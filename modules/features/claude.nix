@@ -1,5 +1,5 @@
 { self, inputs, ... }: {
-  perSystem = { pkgs, lib, self', ... }: {
+  perSystem = { pkgs, lib, self', system, ... }: {
     packages.claude-code = inputs.wrapper-modules.wrappers.claude-code.wrap{
       inherit pkgs;
 
@@ -13,6 +13,10 @@
 	    ];
 	  };
       };
+    };
+
+    packages.claude-desktop = inputs.claude-desktop-linux.packages.${system}.claude-desktop.override {
+      nodePackages = { inherit (pkgs) asar; };
     };
   };
 }

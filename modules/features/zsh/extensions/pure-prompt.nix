@@ -10,6 +10,7 @@
             && promptinit \
             && prompt pure
           '';
+	  zsh-lazy = false;
         };
       };
   };

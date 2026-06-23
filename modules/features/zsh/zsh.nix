@@ -8,6 +8,7 @@
           # QoL
           pkgs.lsd    # ls  on steroids
           pkgs.bat    # cat on steroids
+	  self'.packages.zsh-completions
 	  self'.packages.zsh-fast-syntax-highlighting
 	  self'.packages.deja # Zsh Autosuggestions Improved
 	  self'.packages.pure-prompt
@@ -15,10 +16,11 @@
 
           # General Purpose
           pkgs.ripgrep
-          pkgs.fzf
+	  pkgs.jq
           pkgs.curl
           pkgs.tree
           pkgs.wl-clipboard-rs
+          self'.packages.fzf
 
 	  # Compression
 	  pkgs.zip
@@ -58,9 +60,23 @@
           ssh = "TERM=xterm && ssh"; # Some remote hosts don't understand ghostty.
         };
 
-	# concats passthru.zhrc from deps
+	# concats passthru.zshrc from deps; wraps non-eager ones in a deferred function
         zshrc.content =
-          lib.concatMapStrings (p: (p.passthru.zshrc or "") + "\n") runtimePkgs;
+          "source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh\n" +
+          lib.concatStringsSep "\n" (lib.imap0 (i: p:
+            let
+              content = p.passthru.zshrc or "";
+              fn = "_zsh_deferred_${toString i}";
+            in
+            if content == "" then ""
+            else if (p.passthru.zsh-lazy or true)
+            then ''
+              ${fn}() {
+              ${content}
+              }
+              zsh-defer ${fn}''
+            else content
+          ) runtimePkgs);
 
         zdotdir = ./configs;
       };

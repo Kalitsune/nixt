@@ -9,6 +9,7 @@
 
       # Features
       self.nixosModules.niri
+      self.nixosModules.fonts
     ];
   };
 }
