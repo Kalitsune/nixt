@@ -1,5 +1,7 @@
 # User configuration
 
+SCRIPT_DIR="${funcsourcetrace[1]%/*}"
+
 # ZSH History
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=10000
@@ -21,8 +23,8 @@ fetch
 # misc zsh features
 autoload -Uz add-zsh-hook
 
-# load zsh shards
-source ./load_shards.zsh
+# Load Widgets
+source $SCRIPT_DIR/widgets.zsh
 
 # export the path, done here so that the tools configs can add stuff to it
 export PATH

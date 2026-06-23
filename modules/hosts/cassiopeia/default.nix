@@ -4,7 +4,8 @@
     modules = [
       self.nixosModules.CassiopeiaConfiguration # configuration.nix
       
-      self.nixosModules.home-manager # dotfiles
+      # Flake config
+      self.nixosModules.nix
 
       # Features
       self.nixosModules.niri

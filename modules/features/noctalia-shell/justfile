@@ -1,0 +1,5 @@
+# https://just.systems
+default: noctalia-sync
+
+noctalia-sync:
+  nix run "nixpkgs#noctalia-shell" -- ipc call state all > noctalia-shell.json

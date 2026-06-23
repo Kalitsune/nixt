@@ -22,7 +22,10 @@
 	
 	input = {
 	  focus-follows-mouse = _: {};
-	  keyboard.xkb.layout = "us";
+	  keyboard.xkb = {
+	    options = "compose:rctrl";
+	    layout = "us";
+	  };
 	  touchpad = {
 	    tap = _: {};
 	    natural-scroll = _: {};
@@ -84,12 +87,12 @@
 	  };
 
 	  # Focus Relative Windows
-	  "Mod+Up".focus-window-up = _: {};
-	  "Mod+Down".focus-window-down = _: {};
+	  "Mod+Up".focus-workspace-up = _: {};
+	  "Mod+Down".focus-workspace-down = _: {};
 	  "Mod+Left".focus-column-left = _: {};
 	  "Mod+Right".focus-column-right = _: {};
-	  "Mod+J".focus-window-up = _: {}; # And vim bindings too because why not
-	  "Mod+K".focus-window-down = _: {};
+	  "Mod+J".focus-workspace-up = _: {}; # And vim bindings too because why not
+	  "Mod+K".focus-workspace-down = _: {};
 	  "Mod+L".focus-column-left = _: {};
 	  "Mod+H".focus-column-right = _: {};
 

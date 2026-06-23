@@ -6,6 +6,9 @@
 	self.nixosModules.CassiopeiaHardware
       ];
 
+    # TMP
+    services.teamviewer.enable = true;
+
     # Bootloader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -92,13 +95,9 @@
       #  thunderbird
       ];
     };
-    home-manager.users.kalitsune = self.homeModules.kalitsune; # defined in default.nix
 
     # Install firefox.
     programs.firefox.enable = true;
-
-    # Allow unfree packages
-    nixpkgs.config.allowUnfree = true;
 
     # List packages installed in system profile. To search, run:
     # $ nix search wget

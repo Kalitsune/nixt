@@ -9,8 +9,6 @@
       settings = 
         (builtins.fromJSON
 	  (builtins.readFile ./noctalia-shell.json)).settings;
-
-      outOfStoreConfig = "./noctalia-shell.json"; # Auto updates the config from the gui
     };
 
   };

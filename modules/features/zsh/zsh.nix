@@ -1,68 +1,68 @@
 { inputs, lib, ... }: {
   perSystem = { pkgs, lib, self', ... }: {
-    packages.zsh = inputs.wrapper-modules.wrappers.zsh.wrap {
-      inherit pkgs;
+    packages.zsh =
+      let
+        runtimePkgs = [
+          #TODO: add cutefetch, tldear
 
-      runtimePkgs = [
-      	#TODO: add cutefetch, tldear
+          # QoL
+          pkgs.lsd    # ls  on steroids
+          pkgs.bat    # cat on steroids
+	  self'.packages.zsh-fast-syntax-highlighting
+	  self'.packages.deja # Zsh Autosuggestions Improved
+	  self'.packages.pure-prompt
+          self'.packages.zoxide # cd  on steroids
 
-	# Wrapped
-	self'.packages.git # TODO: Maybe add support for Jujutsu?
-      	
-      	# QoL
-	pkgs.zoxide
-	pkgs.lsd    # ls on steroids
-	pkgs.bat    # cat on steroids
-	
-	# General Purpose
-	pkgs.ripgrep
-	pkgs.fzf
-	pkgs.curl
-	pkgs.tree
+          # General Purpose
+          pkgs.ripgrep
+          pkgs.fzf
+          pkgs.curl
+          pkgs.tree
+          pkgs.wl-clipboard-rs
 
-	# Build systems
-	pkgs.gnumake
-	pkgs.just
-	pkgs.meson
+	  # Compression
+	  pkgs.zip
+	  pkgs.unzip
+	  pkgs.gnutar
 
-	# Forensics
-	pkgs.file
+          # Code
+	  self'.packages.git # TODO: Maybe add support for Jujutsu?
+          self'.packages.claude-code
 
-	# Media
-	pkgs.imagemagick
-	pkgs.ffmpeg-full
-      ];
+          # Build systems
+          pkgs.gnumake
+          pkgs.just
+          pkgs.meson
 
-      zshAliases = {
-      	# ls & Co
-	ls = "lsd";
-	ll = "ls -la";
-	la = "ls -a";
+          # Forensics
+          pkgs.file
 
-	# Vim Addiction
-	":q" = "exit";
+          # Media
+          pkgs.imagemagick
+          pkgs.ffmpeg-full
+        ];
+      in
+      inputs.wrapper-modules.wrappers.zsh.wrap {
+        inherit pkgs runtimePkgs;
 
-	# Fixes
-	ssh = "TERM=xterm && ssh"; # Some remote hosts don't understand ghostty.
+        zshAliases = {
+          # ls & Co
+          ls = "lsd";
+          ll = "ls -la";
+          la = "ls -a";
+
+          # Vim Addiction
+          ":q" = "exit";
+
+          # Fixes
+          ssh = "TERM=xterm && ssh"; # Some remote hosts don't understand ghostty.
+        };
+
+	# concats passthru.zhrc from deps
+        zshrc.content =
+          lib.concatMapStrings (p: (p.passthru.zshrc or "") + "\n") runtimePkgs;
+
+        zdotdir = ./configs;
       };
-
-      # Used to load runtime inputs.
-      zshrc.content = ''
-        # Pure Prompt
-	fpath+=("${pkgs.pure-prompt}/share/zsh/site-functions") \
-        && autoload -U promptinit \
-	&& promptinit \
-        && prompt pure
-
-	# Zoxide - cd on steroid
-	eval "$(${lib.getExe pkgs.zoxide} init --cmd cd zsh)"
-
-	# Deja - ZSH Autocompletions Reloaded
-	eval "$(${lib.getExe pkgs.deja} init zsh)"
-
-	# Zsh Fast Syntax Highlighting
-	source "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
-      '';
-    };
   };
 }
