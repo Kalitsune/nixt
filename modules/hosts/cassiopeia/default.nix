@@ -8,8 +8,8 @@
       self.nixosModules.nix
 
       # Features
+      self.nixosModules.essentials
       self.nixosModules.niri
-      self.nixosModules.fonts
     ];
   };
 }

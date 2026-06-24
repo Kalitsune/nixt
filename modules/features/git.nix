@@ -80,6 +80,10 @@
           bindkey ' ' expand-abbreviation
         '';
       };
+
+      # My implementation of lazy loading scopes the content of .zshrc
+      # As such this cannot be made lazy.
+      zsh-lazy = false;
     };
   };
 }

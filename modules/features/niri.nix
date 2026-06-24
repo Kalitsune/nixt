@@ -2,7 +2,7 @@
   flake.nixosModules.niri = { pkgs, lib, ... }: {
     programs.niri = {
       enable = true;
-      package = self.packages.${pkgs.system}.niri;
+      package = self.packages.${ pkgs.stdenv.hostPlatform.system }.niri;
     };
   };
 
@@ -44,6 +44,7 @@
 	binds = {
 	  # Dedicated Launchers
 	  "Mod+T".spawn-sh = lib.getExe self'.packages.terminal;
+	  "Mod+E".spawn-sh = lib.getExe self'.packages.file-explorer;
 	  "Mod+Escape".spawn-sh = "${noctalia_exe} ipc call lockScreen lock";
 	  "Print".screenshot = _: { 
 	    props.show-pointer = false;
