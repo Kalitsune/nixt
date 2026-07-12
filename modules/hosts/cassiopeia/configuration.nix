@@ -1,10 +1,17 @@
-{ self, inputs, ... }: {
-
-  flake.nixosModules.CassiopeiaConfiguration = { config, pkgs, lib, ... }: {
-    imports =
-      [ 
-	self.nixosModules.CassiopeiaHardware
-      ];
+{
+  self,
+  inputs,
+  ...
+}: {
+  flake.nixosModules.CassiopeiaConfiguration = {
+    config,
+    pkgs,
+    lib,
+    ...
+  }: {
+    imports = [
+      self.nixosModules.CassiopeiaHardware
+    ];
 
     # TMP
     services.teamviewer.enable = true;
@@ -12,6 +19,25 @@
     # Bootloader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
+
+    # Graphics
+    nixpkgs.config.packageOverrides = pkgs: {
+      intel-vaapi-driver = pkgs.intel-vaapi-driver.override {
+        enableHybridCodec = true;
+      };
+    };
+
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
+      extraPackages = with pkgs; [
+        intel-media-driver
+        vpl-gpu-rt
+        libvdpau-va-gl
+      ];
+    };
+
+    environment.sessionVariables = {LIBVA_DRIVER_NAME = "iHD";};
 
     # Use latest kernel.
     boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -25,7 +51,7 @@
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     # Enable Flakes
-    nix.settings.experimental-features = [ "nix-command"  "flakes"];
+    nix.settings.experimental-features = ["nix-command" "flakes"];
 
     # Enable networking
     networking.networkmanager.enable = true;
@@ -90,9 +116,9 @@
     users.users."kalitsune" = {
       isNormalUser = true;
       description = "Fanny";
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = ["networkmanager" "wheel" "video"];
       packages = with pkgs; [
-      #  thunderbird
+        #  thunderbird
       ];
     };
 
@@ -131,7 +157,5 @@
     # Before changing this value read the documentation for this option
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
     system.stateVersion = "26.05"; # Did you read the comment?
-
   };
-
 }

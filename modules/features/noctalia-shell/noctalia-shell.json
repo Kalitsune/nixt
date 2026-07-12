@@ -14,7 +14,7 @@
       "contentPadding": 2,
       "fontScale": 1,
       "enableExclusionZoneInset": true,
-      "backgroundOpacity": 0.93,
+      "backgroundOpacity": 1,
       "useSeparateOpacity": false,
       "marginVertical": 4,
       "marginHorizontal": 4,
@@ -79,6 +79,39 @@
             "hideWhenIdle": true,
             "id": "AudioVisualizer",
             "width": 100
+          },
+          {
+            "defaultSettings": {
+              "barCycleIntervalSec": 5,
+              "barDisplayMode": "active",
+              "barMetric": "prompts",
+              "providers": {
+                "claude": {
+                  "credentialsPath": "~/.claude/.credentials.json",
+                  "enabled": false,
+                  "statsPath": "~/.claude/stats-cache.json"
+                },
+                "codex": {
+                  "enabled": false
+                },
+                "copilot": {
+                  "enabled": false
+                },
+                "gemini": {
+                  "enabled": false
+                },
+                "openrouter": {
+                  "apiKey": "",
+                  "enabled": false
+                },
+                "zen": {
+                  "apiKey": "",
+                  "enabled": false
+                }
+              },
+              "refreshIntervalSec": 30
+            },
+            "id": "plugin:model-usage"
           }
         ],
         "center": [
@@ -125,6 +158,39 @@
           {
             "iconColor": "none",
             "id": "WallpaperSelector"
+          },
+          {
+            "defaultSettings": {
+              "compactMode": false,
+              "defaultPeerAction": "copy-ip",
+              "hideDisconnected": false,
+              "hideMullvadExitNodes": true,
+              "loginServer": "",
+              "pingCount": 5,
+              "refreshInterval": 5000,
+              "showIpAddress": true,
+              "showPeerCount": true,
+              "showSearchBar": false,
+              "sshUsername": "",
+              "taildropDownloadDir": "~/Downloads",
+              "taildropEnabled": true,
+              "taildropReceiveMode": "operator",
+              "terminalCommand": ""
+            },
+            "id": "plugin:tailscale"
+          },
+          {
+            "defaultSettings": {
+              "activeColor": "primary",
+              "camFilterRegex": "",
+              "enableToast": true,
+              "hideInactive": false,
+              "iconSpacing": 4,
+              "inactiveColor": "none",
+              "micFilterRegex": "",
+              "removeMargins": false
+            },
+            "id": "plugin:privacy-indicator"
           },
           {
             "deviceNativePath": "__default__",
@@ -176,7 +242,7 @@
       "showSessionButtonsOnLockScreen": true,
       "showHibernateOnLockScreen": false,
       "enableLockScreenMediaControls": true,
-      "enableShadows": true,
+      "enableShadows": false,
       "enableBlurBehind": true,
       "shadowDirection": "bottom_right",
       "shadowOffsetX": 2,
@@ -230,7 +296,7 @@
       "tooltipsEnabled": true,
       "scrollbarAlwaysVisible": false,
       "boxBorderEnabled": false,
-      "panelBackgroundOpacity": 0.93,
+      "panelBackgroundOpacity": 0.75,
       "translucentWidgets": true,
       "panelsAttachedToBar": true,
       "settingsPanelMode": "attached",
@@ -653,7 +719,7 @@
       "customCommands": "[]"
     },
     "desktopWidgets": {
-      "enabled": true,
+      "enabled": false,
       "overviewEnabled": true,
       "gridSnap": false,
       "gridSnapScale": false,
@@ -662,41 +728,17 @@
           "name": "eDP-1",
           "widgets": [
             {
-              "hideMode": "visible",
+              "hideMode": "hidden",
               "id": "MediaPlayer",
               "roundedCorners": true,
               "scale": 1,
               "showAlbumArt": true,
               "showBackground": true,
               "showButtons": true,
-              "showVisualizer": true,
+              "showVisualizer": false,
               "visualizerType": "linear",
               "x": 12,
               "y": 934
-            },
-            {
-              "colorName": "primary",
-              "height": 72,
-              "hideWhenIdle": false,
-              "id": "AudioVisualizer",
-              "roundedCorners": true,
-              "scale": 1.1867756271243528,
-              "showBackground": true,
-              "visualizerType": "linear",
-              "width": 900,
-              "x": 570,
-              "y": 932
-            },
-            {
-              "diskPath": "/",
-              "id": "SystemStat",
-              "layout": "bottom",
-              "roundedCorners": true,
-              "scale": 1,
-              "showBackground": true,
-              "statType": "CPU",
-              "x": 13,
-              "y": 56
             }
           ]
         }
@@ -731,7 +773,7 @@
       }
     },
     "notificationsState": {
-      "lastSeenTs": 1782186839000
+      "lastSeenTs": 1782376162000
     },
     "changelogState": {
       "lastSeenVersion": "v4.7.7"

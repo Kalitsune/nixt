@@ -1,51 +1,67 @@
-{ inputs, lib, ... }: {
-  perSystem = { pkgs, lib, self', ... }: {
-    packages.zsh =
-      let
-        runtimePkgs = [
-          #TODO: add cutefetch, tldear
+{
+  inputs,
+  lib,
+  ...
+}: {
+  perSystem = {
+    pkgs,
+    lib,
+    self',
+    ...
+  }: {
+    packages.zsh = let
+      runtimePkgs = [
+        #TODO: add cutefetch
 
-          # QoL
-          pkgs.lsd    # ls  on steroids
-          pkgs.bat    # cat on steroids
-	  self'.packages.zsh-completions
-	  self'.packages.zsh-fast-syntax-highlighting
-	  self'.packages.deja # Zsh Autosuggestions Improved
-	  self'.packages.pure-prompt
-          self'.packages.zoxide # cd  on steroids
+        # Nix
+        self'.packages.nh # Nix Helper
 
-          # General Purpose
-          pkgs.ripgrep
-	  pkgs.jq
-          pkgs.curl
-          pkgs.tree
-          pkgs.wl-clipboard-rs
-          self'.packages.fzf
+        # QoL
+        pkgs.lsd # ls  on steroids
+        pkgs.bat # cat on steroids
+        self'.packages.tldr # man +++
+        self'.packages.zsh-completions
+        self'.packages.zsh-fast-syntax-highlighting
+        self'.packages.deja # Zsh Autosuggestions Improved
+        self'.packages.pure-prompt
+        self'.packages.zoxide # cd  on steroids
 
-	  # Compression
-	  pkgs.zip
-	  pkgs.unzip
-	  pkgs.gnutar
+        # General Purpose
+        pkgs.ripgrep
+        pkgs.jq
+        pkgs.curl
+        pkgs.tree
+        pkgs.wl-clipboard-rs
+        self'.packages.fzf
 
-          # Code
-	  self'.packages.git # TODO: Maybe add support for Jujutsu?
-          self'.packages.claude-code
+        # Compression
+        pkgs.zip
+        pkgs.unzip
+        pkgs.gnutar
 
-          # Build systems
-          pkgs.gnumake
-          pkgs.just
-          pkgs.meson
+        # Code
+        self'.packages.editor
+        self'.packages.git # TODO: Maybe add support for Jujutsu?
+        self'.packages.claude-code
 
-          # Forensics
-          pkgs.file
+        # Build systems
+        pkgs.gnumake
+        pkgs.just
+        pkgs.meson
 
-          # Media
-          pkgs.imagemagick
-          pkgs.ffmpeg-full
-        ];
-      in
+        # Forensics
+        pkgs.file
+
+        # Media
+        pkgs.imagemagick
+        pkgs.ffmpeg-full
+        pkgs.pulseaudio
+      ];
+    in
       inputs.wrapper-modules.wrappers.zsh.wrap {
         inherit pkgs runtimePkgs;
+
+        env.EDITOR = "${self'.packages.editor}/bin/nvim";
 
         zshAliases = {
           # ls & Co
@@ -60,23 +76,25 @@
           ssh = "TERM=xterm && ssh"; # Some remote hosts don't understand ghostty.
         };
 
-	# concats passthru.zshrc from deps; wraps non-eager ones in a deferred function
+        # concats passthru.zshrc from deps; wraps non-eager ones in a deferred function
         zshrc.content =
-          "source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh\n" +
-          lib.concatStringsSep "\n" (lib.imap0 (i: p:
-            let
-              content = p.passthru.zshrc or "";
-              fn = "_zsh_deferred_${toString i}";
-            in
-            if content == "" then ""
-            else if (p.passthru.zsh-lazy or true)
-            then ''
-              ${fn}() {
-              ${content}
-              }
-              zsh-defer ${fn}''
-            else content
-          ) runtimePkgs);
+          "source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh\n"
+          + lib.concatStringsSep "\n" (lib.imap0 (
+              i: p: let
+                content = p.passthru.zshrc or "";
+                fn = "_zsh_deferred_${toString i}";
+              in
+                if content == ""
+                then ""
+                else if (p.passthru.zsh-lazy or true)
+                then ''
+                  ${fn}() {
+                  ${content}
+                  }
+                  zsh-defer ${fn}''
+                else content
+            )
+            runtimePkgs);
 
         zdotdir = ./configs;
       };

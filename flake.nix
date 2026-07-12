@@ -1,7 +1,7 @@
 {
   description = "Dendritic Nix Config by Kalitsune";
   inputs = {
-    nixpkgs.url =  "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Dendritic Pattern Magic
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -19,10 +19,10 @@
       url = "github:k3d3/claude-desktop-linux-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
-  outputs = inputs: inputs.flake-parts.lib.mkFlake 
-    {inherit inputs;} 
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake
+    {inherit inputs;}
     (inputs.import-tree ./modules); # only imports .nix files that are not prefixed by _
 }

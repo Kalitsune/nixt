@@ -1,0 +1,56 @@
+{
+  "Header": {
+    "prefix": "\\head",
+    "body": [
+        "#import \"@preview/numbly:0.1.0\": numbly",
+        "",
+        "#set page(paper: \"a4\", numbering: \"1\")",
+        "#set heading(numbering: numbly(",
+        "    \"{1}.\",",
+        "    \"{1}.{2}.\",",
+        "    \"{2}.{3:a}.\",",
+        "    \"{2}.{3:a}.{4}.\",",
+        "    \"{2}.{3:a}.{4}.{5:a}.\",",
+        "))",
+        "#set text(font: \"SF Pro Text\")",
+        "",
+        "#show ref: content => underline(content)",
+        "#show link: content => underline(content)",
+        "",
+        ""
+    ],
+    "description": "File Header"
+  },
+  "Function": {
+    "prefix": "\\fun",
+    "body": [
+        "#let ${0:name}(${1:args}) = {",
+        "    $2",
+        "}"
+    ],
+    "description": "Creates a new function"
+  },
+  "Cover": {
+      "prefix": "\\cover",
+      "body": [
+          "#align(center + horizon)[",
+          "  #v(2in) // Add vertical space from the top",
+          "  #text(size: 24pt, weight: \"bold\")[",
+          "    $(0:Title of my document)",
+          "  ]",
+          "",
+          "  #v(1in)",
+          "  #text(size: 16pt)[",
+          "    $(1: Author NAME)",
+          "  ]",
+          "",
+          "  #v(1in)",
+          "  #text(size: 12pt, fill: gray)[",
+          "    Submission Date: #datetime.today().display()",
+          "  ]",
+          "]",
+          "#pagebreak()",
+          "$2"
+      ]
+  }
+}
