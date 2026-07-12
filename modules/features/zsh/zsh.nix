@@ -42,6 +42,8 @@
         # Code
         self'.packages.editor
         self'.packages.git # TODO: Maybe add support for Jujutsu?
+        self'.packages.tailscale
+        pkgs.git-lfs
         self'.packages.claude-code
 
         # Build systems
@@ -56,6 +58,7 @@
         pkgs.imagemagick
         pkgs.ffmpeg-full
         pkgs.pulseaudio
+        pkgs.vips
       ];
     in
       inputs.wrapper-modules.wrappers.zsh.wrap {

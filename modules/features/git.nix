@@ -16,6 +16,12 @@
         settings = {
           core.editor = lib.getExe self'.packages.editor;
           init.defaultBranch = "main";
+          filter.lfs = {
+            clean    = "${pkgs.git-lfs}/bin/git-lfs clean -- %f";
+            smudge   = "${pkgs.git-lfs}/bin/git-lfs smudge -- %f";
+            process  = "${pkgs.git-lfs}/bin/git-lfs filter-process";
+            required = true;
+          };
 
           pull.rep = false;
           push = {

@@ -13,7 +13,9 @@
       # Features
       self.nixosModules.all
       self.nixosModules.niri
+      self.nixosModules.wallpapers
       self.nixosModules.programming-languages
+      self.nixosModules.ios
     ];
   };
 }

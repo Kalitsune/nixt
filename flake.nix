@@ -24,5 +24,5 @@
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake
     {inherit inputs;}
-    (inputs.import-tree ./modules); # only imports .nix files that are not prefixed by _
+    (inputs.import-tree.matchNot ".*/shell\\.nix" ./modules);
 }

@@ -9,6 +9,7 @@
 
   flake.nixosModules.programming-languages = {...}: {
     imports = [
+      self.nixosModules.c
       self.nixosModules.golang
       self.nixosModules.python
       self.nixosModules.rust

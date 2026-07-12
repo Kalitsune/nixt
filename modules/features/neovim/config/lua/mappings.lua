@@ -14,6 +14,10 @@ end, { noremap = true, silent = true, desc = "Fix Diagnostics" })
 
 map("n", "<leader>ds", vim.diagnostic.open_float, { noremap = true, silent = true, desc = "Show Diagnostics" })
 
+map("n", "<leader>ar", function()
+  vim.opt.relativenumber = not vim.o.relativenumber
+end, { noremap = true, silent = true, desc = "Relative numbers" })
+
 map("n", "<Tab>",   "<cmd>bnext<cr>",     { noremap = true, silent = true, desc = "Next buffer" })
 map("n", "<S-Tab>", "<cmd>bprevious<cr>", { noremap = true, silent = true, desc = "Prev buffer" })
 map("n", "<leader>x", function()

@@ -101,6 +101,7 @@
               { "<leader>sb", icon = "" },
 
               { "<leader>g",  group = "Version Control", icon = "" },
+              { "<leader>a",  group = "Apparence", icon = "󰢵" },
             })
           '';
         };
@@ -164,9 +165,14 @@
           after = ["mini"];
           config = ''
             require('blink.cmp').setup({
-              keymap   = { preset = 'enter' },
-              sources  = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
-              snippets = { preset = 'mini_snippets' },
+              keymap   = {
+                preset    = 'enter',
+                ['<Tab>']   = { 'select_next', 'fallback' },
+                ['<S-Tab>'] = { 'select_prev', 'fallback' },
+              },
+              sources   = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
+              snippets  = { preset = 'mini_snippets' },
+              signature = { enabled = true },
             })
           '';
         };
