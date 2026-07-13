@@ -7,16 +7,16 @@
     pkgs,
     lib,
     self',
+    system,
     ...
   }: {
     packages.zsh = let
       runtimePkgs = [
-        #TODO: add cutefetch
-
         # Nix
         self'.packages.nh # Nix Helper
 
         # QoL
+        inputs.cypkgs.packages.${system}.cutefetch
         pkgs.lsd # ls  on steroids
         pkgs.bat # cat on steroids
         self'.packages.tldr # man +++

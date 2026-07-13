@@ -110,7 +110,7 @@
     # services.xserver.libinput.enable = true;
 
     # Define default shell
-    users.defaultUserShell = self.packages.${pkgs.system}.shell;
+    users.defaultUserShell = self.packages.${pkgs.stdenv.hostPlatform.system}.shell;
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.users."kalitsune" = {
@@ -128,7 +128,7 @@
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
-      self.packages.${pkgs.system}.claude-desktop
+      self.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
     ];
 
     # Some programs need SUID wrappers, can be configured further or are

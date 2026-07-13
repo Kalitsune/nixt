@@ -98,6 +98,27 @@
         "type": "github"
       }
     },
+    "cypkgs": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782537493,
+        "narHash": "sha256-RcovFRIggE7ZLlgV1apQMKIIimkdltR5QTtxMlGWVLk=",
+        "owner": "cybardev",
+        "repo": "nix-channel",
+        "rev": "fa133462aac37ef993f4fde8aea413e4f73d6d12",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cybardev",
+        "ref": "main",
+        "repo": "nix-channel",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -212,6 +233,7 @@
       "inputs": {
         "apple-fonts": "apple-fonts",
         "claude-desktop-linux": "claude-desktop-linux",
+        "cypkgs": "cypkgs",
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "nixpkgs": "nixpkgs",
