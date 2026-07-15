@@ -7,7 +7,6 @@
     pkgs,
     lib,
     self',
-    system,
     ...
   }: {
     packages.zsh = let
@@ -16,7 +15,6 @@
         self'.packages.nh # Nix Helper
 
         # QoL
-        inputs.cypkgs.packages.${system}.cutefetch
         pkgs.lsd # ls  on steroids
         pkgs.bat # cat on steroids
         self'.packages.tldr # man +++
@@ -24,6 +22,7 @@
         self'.packages.zsh-fast-syntax-highlighting
         self'.packages.deja # Zsh Autosuggestions Improved
         self'.packages.pure-prompt
+        self'.packages.cutefetch
         self'.packages.zoxide # cd  on steroids
 
         # General Purpose
@@ -81,7 +80,9 @@
 
         # concats passthru.zshrc from deps; wraps non-eager ones in a deferred function
         zshrc.content =
-          "source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh\n"
+          ''
+            source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh
+          ''
           + lib.concatStringsSep "\n" (lib.imap0 (
               i: p: let
                 content = p.passthru.zshrc or "";
