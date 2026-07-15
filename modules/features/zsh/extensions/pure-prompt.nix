@@ -2,21 +2,23 @@
   inputs,
   lib,
   ...
-}: {
-  perSystem = {
-    pkgs,
-    lib,
-    self',
-    ...
-  }: {
-    packages.pure-prompt = let
-      p = pkgs.pure-prompt;
-    in
-      p
-      // {
-        passthru =
-          (p.passthru or {})
-          // {
+}:
+{
+  perSystem =
+    {
+      pkgs,
+      lib,
+      self',
+      ...
+    }:
+    {
+      packages.pure-prompt =
+        let
+          p = pkgs.pure-prompt;
+        in
+        p
+        // {
+          passthru = (p.passthru or { }) // {
             zshrc = ''
               fpath+=("${p}/share/zsh/site-functions") \
               && autoload -U promptinit \
@@ -25,6 +27,6 @@
             '';
             zsh-lazy = false;
           };
-      };
-  };
+        };
+    };
 }

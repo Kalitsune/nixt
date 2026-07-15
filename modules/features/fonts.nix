@@ -1,4 +1,5 @@
-{inputs, ...}: let
+{ inputs, ... }:
+let
   fontPackages = pkgs: [
     # Nerd Fonts
     pkgs.nerd-fonts.jetbrains-mono
@@ -11,15 +12,16 @@
     inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}.sf-mono
     inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}.ny
   ];
-in {
-  flake.nixosModules.fonts = {pkgs, ...}: {
+in
+{
+  flake.nixosModules.fonts = { pkgs, ... }: {
     fonts = {
       enableDefaultPackages = true;
       packages = fontPackages pkgs;
     };
   };
 
-  flake.darwinModules.fonts = {pkgs, ...}: {
+  flake.darwinModules.fonts = { pkgs, ... }: {
     fonts.packages = fontPackages pkgs;
   };
 }

@@ -1,5 +1,5 @@
-{...}: {
-  flake.nixosModules.ios = {pkgs, ...}: {
+{ ... }: {
+  flake.nixosModules.ios = { pkgs, ... }: {
     services.usbmuxd.enable = true;
 
     environment.systemPackages = with pkgs; [

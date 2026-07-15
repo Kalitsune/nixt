@@ -1,5 +1,5 @@
-{...}: {
-  flake.nixosModules.golang = {pkgs, ...}: {
+{ ... }: {
+  flake.nixosModules.golang = { pkgs, ... }: {
     environment = {
       systemPackages = [
         pkgs.go
@@ -12,7 +12,7 @@
     };
   };
 
-  flake.nixosModules.python = {pkgs, ...}: {
+  flake.nixosModules.python = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.python3
       pkgs.uv
@@ -20,14 +20,14 @@
     ];
   };
 
-  flake.nixosModules.rust = {pkgs, ...}: {
+  flake.nixosModules.rust = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.rustup
       pkgs.rust-analyzer
     ];
   };
 
-  flake.nixosModules.c = {pkgs, ...}: {
+  flake.nixosModules.c = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.gcc
       pkgs.gdb
@@ -37,7 +37,7 @@
     ];
   };
 
-  flake.nixosModules.terraform = {pkgs, ...}: {
+  flake.nixosModules.terraform = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.opentofu
       pkgs.tofu-ls

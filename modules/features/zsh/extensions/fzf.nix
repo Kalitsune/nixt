@@ -1,17 +1,18 @@
-{inputs, ...}: {
-  perSystem = {
-    pkgs,
-    lib,
-    ...
-  }: {
-    packages.fzf = let
-      p = pkgs.fzf;
-    in
-      p
-      // {
-        passthru =
-          (p.passthru or {})
-          // {
+{ inputs, ... }: {
+  perSystem =
+    {
+      pkgs,
+      lib,
+      ...
+    }:
+    {
+      packages.fzf =
+        let
+          p = pkgs.fzf;
+        in
+        p
+        // {
+          passthru = (p.passthru or { }) // {
             zshrc = ''
               eval "$(${lib.getExe p} --zsh)"
               source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
@@ -24,6 +25,6 @@
 
             '';
           };
-      };
-  };
+        };
+    };
 }

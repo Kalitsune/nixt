@@ -8,7 +8,7 @@ return {
     typst      = { "typstyle" },
     java       = { "clang-format" },
     c          = { "clang-format" },
-    nix        = { "alejandra" },
+    nix        = { "nixfmt" },
   },
   format_on_save = {
     timeout_ms   = 500,

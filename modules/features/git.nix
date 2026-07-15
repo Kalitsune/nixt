@@ -2,41 +2,43 @@
   self,
   inputs,
   ...
-}: {
-  perSystem = {
-    pkgs,
-    lib,
-    self',
-    ...
-  }: {
-    packages.git = let
-      p = inputs.wrapper-modules.wrappers.git.wrap {
-        inherit pkgs;
+}:
+{
+  perSystem =
+    {
+      pkgs,
+      lib,
+      self',
+      ...
+    }:
+    {
+      packages.git =
+        let
+          p = inputs.wrapper-modules.wrappers.git.wrap {
+            inherit pkgs;
 
-        settings = {
-          core.editor = lib.getExe self'.packages.editor;
-          init.defaultBranch = "main";
-          filter.lfs = {
-            clean    = "${pkgs.git-lfs}/bin/git-lfs clean -- %f";
-            smudge   = "${pkgs.git-lfs}/bin/git-lfs smudge -- %f";
-            process  = "${pkgs.git-lfs}/bin/git-lfs filter-process";
-            required = true;
-          };
+            settings = {
+              core.editor = lib.getExe self'.packages.editor;
+              init.defaultBranch = "main";
+              filter.lfs = {
+                clean = "${pkgs.git-lfs}/bin/git-lfs clean -- %f";
+                smudge = "${pkgs.git-lfs}/bin/git-lfs smudge -- %f";
+                process = "${pkgs.git-lfs}/bin/git-lfs filter-process";
+                required = true;
+              };
 
-          pull.rep = false;
-          push = {
-            default = "simple";
-            autoSetupRemote = true;
+              pull.rep = false;
+              push = {
+                default = "simple";
+                autoSetupRemote = true;
+              };
+              fetch.prune = true; # auto removes stale remote branch refs
+            };
           };
-          fetch.prune = true; # auto removes stale remote branch refs
-        };
-      };
-    in
-      p
-      // {
-        passthru =
-          (p.passthru or {})
-          // {
+        in
+        p
+        // {
+          passthru = (p.passthru or { }) // {
             # zle -N and bindkey must be registered before the first prompt
             zsh-lazy = false;
             zshrc = ''
@@ -101,6 +103,6 @@
               bindkey ' ' expand-abbreviation
             '';
           };
-      };
-  };
+        };
+    };
 }

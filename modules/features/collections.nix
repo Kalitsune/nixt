@@ -1,5 +1,5 @@
-{self, ...}: {
-  flake.nixosModules.all = {...}: {
+{ self, ... }: {
+  flake.nixosModules.all = { ... }: {
     imports = [
       self.nixosModules.essentials
       self.nixosModules.education
@@ -7,7 +7,7 @@
     ];
   };
 
-  flake.nixosModules.programming-languages = {...}: {
+  flake.nixosModules.programming-languages = { ... }: {
     imports = [
       self.nixosModules.c
       self.nixosModules.golang
@@ -17,31 +17,34 @@
     ];
   };
 
-  flake.nixosModules.essentials = {pkgs, ...}: {
-    imports = [self.nixosModules.tailscale];
+  flake.nixosModules.essentials = { pkgs, ... }: {
+    imports = [ self.nixosModules.tailscale ];
 
     environment.systemPackages = [
       # Apps
       self.packages.${pkgs.stdenv.hostPlatform.system}.browser
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor
       pkgs.beeper
+      pkgs.localsend
 
       # Utils
       pkgs.mission-center
     ];
   };
 
-  flake.nixosModules.education = {pkgs, ...}: {
+  flake.nixosModules.education = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.anki
     ];
   };
 
-  flake.nixosModules.entertainment = {pkgs, ...}: {
+  flake.nixosModules.entertainment = { pkgs, ... }: {
     programs.steam = {
       enable = true;
       package = pkgs.steam.override {
-        extraEnv = {LIBGL_ALWAYS_SOFTWARE = "1";};
+        extraEnv = {
+          LIBGL_ALWAYS_SOFTWARE = "1";
+        };
       };
     };
 

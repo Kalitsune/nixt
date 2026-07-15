@@ -2,7 +2,8 @@
   inputs,
   self,
   ...
-}: {
+}:
+{
   # Defines Supported Architectures
   config = {
     systems = [
@@ -12,7 +13,7 @@
       "aarch64-darwin"
     ];
 
-    perSystem = {system, ...}: {
+    perSystem = { system, ... }: {
       _module.args.pkgs = import inputs.nixpkgs {
         inherit system;
 

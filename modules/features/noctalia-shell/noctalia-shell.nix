@@ -2,16 +2,15 @@
   self,
   inputs,
   ...
-}: {
-  perSystem = {pkgs, ...}: {
+}:
+{
+  perSystem = { pkgs, ... }: {
     packages.noctalia-shell = inputs.wrapper-modules.wrappers.noctalia-shell.wrap {
       inherit pkgs;
 
-      runtimePkgs = [pkgs.cliphist];
+      runtimePkgs = [ pkgs.cliphist ];
 
-      settings =
-        (builtins.fromJSON
-          (builtins.readFile ./noctalia-shell.json)).settings;
+      settings = (builtins.fromJSON (builtins.readFile ./noctalia-shell.json)).settings;
     };
   };
 }
