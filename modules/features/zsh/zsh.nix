@@ -9,12 +9,14 @@
       pkgs,
       lib,
       self',
+      config,
       ...
     }:
     {
       packages.zsh =
         let
           runtimePkgs = [
+
             # Nix
             self'.packages.nh # Nix Helper
 
@@ -81,28 +83,26 @@
             ssh = "TERM=xterm && ssh"; # Some remote hosts don't understand ghostty.
           };
 
-          # concats passthru.zshrc from deps; wraps non-eager ones in a deferred function
           zshrc.content = ''
             source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh
           ''
           + lib.concatStringsSep "\n" (
             lib.imap0 (
-              i: p:
+              i: entry:
               let
-                content = p.passthru.zshrc or "";
                 fn = "_zsh_deferred_${toString i}";
               in
-              if content == "" then
+              if entry.content == "" then
                 ""
-              else if (p.passthru.zsh-lazy or true) then
+              else if entry.lazy then
                 ''
                   ${fn}() {
-                  ${content}
+                  ${entry.content}
                   }
                   zsh-defer ${fn}''
               else
-                content
-            ) runtimePkgs
+                entry.content
+            ) config.zsh.rc
           );
 
           zdotdir = ./configs;

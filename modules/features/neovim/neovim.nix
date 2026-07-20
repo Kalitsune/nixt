@@ -99,12 +99,12 @@
                 { "<leader>d",  group = "Diagnostics", icon = " " },
                 { "<leader>df", icon = "󰶯" },
 
-                { "<leader>f",  group = "Format" },
-                { "<leader>fo", icon = "󰗈" },
+                { "<leader>c",  group = "Conform" },
+                { "<leader>co", icon = "󰗈" },
 
-                { "<leader>s",  group = "Search" },
-                { "<leader>sf", icon = { cat = "default", name = "file" } },
-                { "<leader>sb", icon = "" },
+                { "<leader>f",  group = "Search" },
+                { "<leader>ff", icon = { cat = "default", name = "file" } },
+                { "<leader>fb", icon = "" },
 
                 { "<leader>g",  group = "Version Control", icon = "" },
                 { "<leader>a",  group = "Apparence", icon = "󰢵" },
@@ -125,9 +125,9 @@
               require('telescope').setup({})
               require('telescope').load_extension('fzf')
               local t = require('telescope.builtin')
-              vim.keymap.set('n', '<leader>sf', t.find_files, { desc = 'Search files' })
-              vim.keymap.set('n', '<leader>sg', t.live_grep,  { desc = 'Live grep' })
-              vim.keymap.set('n', '<leader>sb', t.buffers,    { desc = 'Search buffers' })
+              vim.keymap.set('n', '<leader>ff', t.find_files, { desc = 'Search files' })
+              vim.keymap.set('n', '<leader>fg', t.live_grep,  { desc = 'Live grep' })
+              vim.keymap.set('n', '<leader>fb', t.buffers,    { desc = 'Search buffers' })
             '';
           };
 

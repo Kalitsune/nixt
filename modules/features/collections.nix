@@ -2,6 +2,7 @@
   flake.nixosModules.all = { ... }: {
     imports = [
       self.nixosModules.essentials
+      self.nixosModules.optionals
       self.nixosModules.education
       self.nixosModules.entertainment
     ];
@@ -29,6 +30,12 @@
 
       # Utils
       pkgs.mission-center
+    ];
+  };
+
+  flake.nixosModules.optionals = { pkgs, ... }: {
+    environment.systemPackages = [
+      pkgs.valent
     ];
   };
 

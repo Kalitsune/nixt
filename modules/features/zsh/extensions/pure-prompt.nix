@@ -12,21 +12,17 @@
       ...
     }:
     {
-      packages.pure-prompt =
-        let
-          p = pkgs.pure-prompt;
-        in
-        p
-        // {
-          passthru = (p.passthru or { }) // {
-            zshrc = ''
-              fpath+=("${p}/share/zsh/site-functions") \
-              && autoload -U promptinit \
-              && promptinit \
-              && prompt pure
-            '';
-            zsh-lazy = false;
-          };
-        };
+      zsh.rc = [
+        {
+          lazy = false;
+          content = ''
+            fpath+=("${pkgs.pure-prompt}/share/zsh/site-functions") \
+            && autoload -U promptinit \
+            && promptinit \
+            && prompt pure
+          '';
+        }
+      ];
+      packages.pure-prompt = pkgs.pure-prompt;
     };
 }

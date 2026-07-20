@@ -6,15 +6,8 @@
       ...
     }:
     {
-      packages.zoxide =
-        let
-          p = pkgs.zoxide;
-        in
-        p
-        // {
-          passthru = (p.passthru or { }) // {
-            zshrc = "eval \"$(${lib.getExe p} init --cmd cd zsh)\"";
-          };
-        };
+      zsh.rc = [{ content = ''eval "$(${lib.getExe pkgs.zoxide} init --cmd cd zsh)"''; }];
+
+      packages.zoxide = pkgs.zoxide;
     };
 }
