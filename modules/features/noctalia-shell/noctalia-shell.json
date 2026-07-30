@@ -303,7 +303,7 @@
       "settingsPanelSideBarCardStyle": false
     },
     "location": {
-      "name": "Shinjuku",
+      "name": "",
       "weatherEnabled": true,
       "weatherShowEffects": true,
       "weatherTaliaMascotAlways": false,
@@ -348,7 +348,7 @@
       "fillColor": "#000000",
       "useSolidColor": false,
       "solidColor": "#1a1a2e",
-      "automationEnabled": true,
+      "automationEnabled": false,
       "wallpaperChangeMode": "random",
       "randomIntervalSec": 1800,
       "transitionDuration": 1500,
@@ -651,7 +651,7 @@
       "volumeStep": 5,
       "volumeOverdrive": false,
       "spectrumFrameRate": 30,
-      "visualizerType": "linear",
+      "visualizerType": "mirrored",
       "spectrumMirrored": true,
       "mprisBlacklist": [],
       "preferredPlayer": "",
@@ -667,7 +667,7 @@
     "colorSchemes": {
       "useWallpaperColors": true,
       "predefinedScheme": "Noctalia (default)",
-      "darkMode": true,
+      "darkMode": false,
       "schedulingMode": "location",
       "manualSunrise": "06:30",
       "manualSunset": "18:30",
@@ -752,7 +752,7 @@
     "openedPanel": "",
     "lockScreenActive": false,
     "wallpapers": {
-      "eDP-1": "/nix/store/wp0kv9bbq8w0k4pzbr7g9yy52nbhfm6c-noctalia-shell-4.7.7/share/noctalia-shell/Assets/Wallpaper/noctalia.png"
+      "eDP-1": "/home/kalitsune/.config/wallpaper.png"
     },
     "desktopWidgetsEditMode": false,
     "display": {
@@ -773,7 +773,7 @@
       }
     },
     "notificationsState": {
-      "lastSeenTs": 1782376162000
+      "lastSeenTs": 1784548816000
     },
     "changelogState": {
       "lastSeenVersion": "v4.7.7"

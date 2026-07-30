@@ -16,17 +16,13 @@
         change-wallpaper
       ];
 
-      systemd.user.tmpfiles.rules = [
-        "d %h/.config/wallpaper 0755 - - -"
-      ];
-
       systemd.user.services.wallpaper-changer = {
         description = "Change desktop wallpaper";
         after = [ "graphical-session.target" ];
         wants = [ "graphical-session.target" ];
         script = ''
-          ${lib.getExe change-wallpaper} --output "$HOME/.config/wallpaper/wallpaper.png"
-          ${lib.getExe noctalia} ipc call wallpaperSelector random || true
+          wallpaper=$(${lib.getExe change-wallpaper} --filter "$(cat "$HOME/.config/wallpaper-filter.txt" 2>/dev/null)")
+          ${lib.getExe noctalia} ipc call wallpaper set "$wallpaper" || true
         '';
         serviceConfig.Type = "oneshot";
       };

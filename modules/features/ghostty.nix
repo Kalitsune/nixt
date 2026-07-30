@@ -26,6 +26,7 @@
           env.GTK_IM_MODULE = "ibus";
 
           settings = {
+            # Aesthetics
             theme = "Rose Pine";
             window-decoration = false;
             # gtk-tabs-location = "hidden";

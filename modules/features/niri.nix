@@ -32,10 +32,15 @@
           let
             noctalia_exe = lib.getExe self'.packages.noctalia-shell;
             wpctl_exe = lib.getExe' pkgs.wireplumber "wpctl";
+            vicinae = lib.getExe self'.packages.vicinae;
           in
           {
             spawn-at-startup = [
               noctalia_exe
+              [
+                (lib.getExe self'.packages.vicinae)
+                "server"
+              ]
             ];
 
             xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
@@ -70,6 +75,7 @@
               "Print".screenshot = _: {
                 props.show-pointer = false;
               };
+              "Mod+C".spawn-sh = lib.getExe pkgs.normcap;
 
               # Window Controls
               "Mod+X".close-window = _: { };
@@ -77,9 +83,9 @@
               "Mod+Shift+X".spawn-sh = "kill -9 $(niri msg -j focused-window | ${lib.getExe pkgs.jq} '.pid')";
 
               # App Launcher, Clipboard history, Emoji Picker, Power Menu.
-              "Mod+Space".spawn-sh = "${noctalia_exe} ipc call launcher toggle";
-              "Mod+V".spawn-sh = "${noctalia_exe} ipc call launcher clipboard";
-              "Mod+semicolon".spawn-sh = "${noctalia_exe} ipc call launcher emoji";
+              "Mod+Space".spawn-sh = "${vicinae} toggle";
+              "Mod+V".spawn-sh = "${vicinae} vicinae://launch/clipboard/history";
+              "Mod+semicolon".spawn-sh = "${vicinae} vicinae://launch/core/search-emojis";
               "Mod+M".spawn-sh = "${noctalia_exe} ipc call sessionMenu toggle";
 
               # Media Controls

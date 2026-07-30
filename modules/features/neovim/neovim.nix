@@ -34,7 +34,7 @@
           typstyle
 
           # Formatters (cont.)
-          nixfmt-rfc-style # nix
+          nixfmt # nix
 
           # Linters
           eslint
@@ -99,10 +99,10 @@
                 { "<leader>d",  group = "Diagnostics", icon = " " },
                 { "<leader>df", icon = "󰶯" },
 
-                { "<leader>c",  group = "Conform" },
+                { "<leader>c",  group = "Conform", icon = "󰗈" },
                 { "<leader>co", icon = "󰗈" },
 
-                { "<leader>f",  group = "Search" },
+                { "<leader>f",  group = "Find" },
                 { "<leader>ff", icon = { cat = "default", name = "file" } },
                 { "<leader>fb", icon = "" },
 

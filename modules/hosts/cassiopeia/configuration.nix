@@ -132,7 +132,7 @@
           "video"
         ];
         packages = with pkgs; [
-          #  thunderbird
+          google-cloud-sdk
         ];
       };
 

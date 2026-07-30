@@ -2,7 +2,7 @@
   flake.nixosModules.all = { ... }: {
     imports = [
       self.nixosModules.essentials
-      self.nixosModules.optionals
+      self.nixosModules.extra
       self.nixosModules.education
       self.nixosModules.entertainment
     ];
@@ -12,6 +12,7 @@
     imports = [
       self.nixosModules.c
       self.nixosModules.golang
+      self.nixosModules.nodejs
       self.nixosModules.python
       self.nixosModules.rust
       self.nixosModules.terraform
@@ -33,9 +34,10 @@
     ];
   };
 
-  flake.nixosModules.optionals = { pkgs, ... }: {
+  flake.nixosModules.extra = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.valent
+      pkgs.figma-linux
     ];
   };
 

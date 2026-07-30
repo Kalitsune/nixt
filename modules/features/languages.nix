@@ -37,6 +37,14 @@
     ];
   };
 
+  flake.nixosModules.nodejs = { pkgs, ... }: {
+    environment.systemPackages = [
+      pkgs.nodejs
+      pkgs.typescript-language-server
+      pkgs.prettier
+    ];
+  };
+
   flake.nixosModules.terraform = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.opentofu

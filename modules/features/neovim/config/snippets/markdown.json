@@ -1,0 +1,42 @@
+{
+  "Info": {
+    "prefix": [">info", "> info"],
+    "body": [
+        "> [!INFO]",
+        "> $0"
+    ],
+    "description": "Admonition INFO Block"
+  },
+  "Tip": {
+    "prefix": [">tip", "> tip"],
+    "body": [
+        "> [!TIP]",
+        "> $0"
+    ],
+    "description": "Admonition TIP Block"
+  },
+  "Important": {
+    "prefix": [">important", "> important"],
+    "body": [
+        "> [!IMPORTANT]",
+        "> $0"
+    ],
+    "description": "Admonition TIP Block"
+  },
+  "Warning": {
+    "prefix": [">warn", "> warn", ">warning", "> warning"],
+    "body": [
+        "> [!WARNING]",
+        "> $0"
+    ],
+    "description": "Admonition WARNING Block"
+  },
+  "Caution": {
+    "prefix": [">caution", "> caution"],
+    "body": [
+        "> [!CAUTION]",
+        "> $0"
+    ],
+    "description": "Admonition CAUTION Block"
+  }
+}
