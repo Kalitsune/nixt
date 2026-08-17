@@ -43,6 +43,7 @@
 
       environment.sessionVariables = {
         LIBVA_DRIVER_NAME = "iHD";
+        NIXOS_OZONE_WL = "1";
       };
 
       # Use latest kernel.
@@ -67,7 +68,7 @@
       networking.networkmanager.enable = true;
 
       # Set your time zone.
-      time.timeZone = "Asia/Tokyo";
+      time.timeZone = "Europe/Paris";
 
       # Select internationalisation properties.
       i18n.defaultLocale = "en_US.UTF-8";
