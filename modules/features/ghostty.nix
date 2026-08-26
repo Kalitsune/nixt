@@ -29,6 +29,7 @@
             # Aesthetics
             theme = "Rose Pine";
             window-decoration = false;
+            gtk-single-instance = false;
             # gtk-tabs-location = "hidden";
 
             keybind = [

@@ -17,12 +17,14 @@
   };
 
   perSystem = { ... }: {
-    zsh.rc = [{
-      lazy = false;
-      content = /* zsh */ ''
-        alias ts="tailscale status"
-        alias tsen="tailscale set --exit-nod"
-      '';
-    }];
+    zsh.rc = [
+      {
+        lazy = false;
+        content = /* zsh */ ''
+          alias ts="tailscale status"
+          alias tsen="tailscale set --exit-nod"
+        '';
+      }
+    ];
   };
 }

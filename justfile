@@ -2,4 +2,4 @@ all:
     nh os switch
 
 fmt:
-    alejandra .
+    nix fmt .

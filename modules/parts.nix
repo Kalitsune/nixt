@@ -13,12 +13,14 @@
       "aarch64-darwin"
     ];
 
-    perSystem = { system, ... }: {
+    perSystem = { system, pkgs, ... }: {
       _module.args.pkgs = import inputs.nixpkgs {
         inherit system;
 
         config.allowUnfree = true;
       };
+
+      formatter = pkgs.nixfmt;
     };
   };
 }

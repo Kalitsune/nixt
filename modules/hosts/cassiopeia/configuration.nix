@@ -43,7 +43,6 @@
 
       environment.sessionVariables = {
         LIBVA_DRIVER_NAME = "iHD";
-        NIXOS_OZONE_WL = "1";
       };
 
       # Use latest kernel.
@@ -83,19 +82,6 @@
         LC_PAPER = "fr_FR.UTF-8";
         LC_TELEPHONE = "fr_FR.UTF-8";
         LC_TIME = "fr_FR.UTF-8";
-      };
-
-      # Enable the X11 windowing system.
-      services.xserver.enable = true;
-
-      # Enable the GNOME Desktop Environment.
-      services.displayManager.gdm.enable = true;
-      services.desktopManager.gnome.enable = true;
-
-      # Configure keymap in X11
-      services.xserver.xkb = {
-        layout = "us";
-        variant = "";
       };
 
       # Enable CUPS to print documents.
@@ -144,6 +130,7 @@
       # $ nix search wget
       environment.systemPackages = with pkgs; [
         self.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
+        wireguard-tools
       ];
 
       # Some programs need SUID wrappers, can be configured further or are
@@ -158,6 +145,9 @@
 
       # Enable the OpenSSH daemon.
       # services.openssh.enable = true;
+
+      # WireGuard
+      networking.firewall.allowedUDPPorts = [ 51820 ];
 
       # Open ports in the firewall.
       # networking.firewall.allowedTCPPorts = [ ... ];

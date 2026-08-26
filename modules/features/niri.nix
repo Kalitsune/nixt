@@ -64,6 +64,7 @@
               geometry-corner-radius = 20;
               clip-to-geometry = true;
             };
+
             debug.honor-xdg-activation-with-invalid-serial = _: { };
 
             binds = {

@@ -20,13 +20,19 @@
   };
 
   flake.nixosModules.essentials = { pkgs, ... }: {
-    imports = [ self.nixosModules.tailscale ];
+    imports = [
+      self.nixosModules.tailscale
+      self.nixosModules.flatpak
+    ];
 
     environment.systemPackages = [
       # Apps
+      self.packages.${pkgs.stdenv.hostPlatform.system}.terminal
       self.packages.${pkgs.stdenv.hostPlatform.system}.browser
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor
+      self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
       pkgs.beeper
+      pkgs.filezilla
       pkgs.localsend
 
       # Utils
@@ -45,6 +51,10 @@
     environment.systemPackages = [
       pkgs.anki
     ];
+  };
+
+  flake.nixosModules.voxel-games = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.prismlauncher ];
   };
 
   flake.nixosModules.entertainment = { pkgs, ... }: {

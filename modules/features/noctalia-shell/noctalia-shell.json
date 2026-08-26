@@ -420,7 +420,7 @@
             "id": "Bluetooth"
           },
           {
-            "id": "WallpaperSelector"
+            "id": "DarkMode"
           },
           {
             "id": "NoctaliaPerformance"
@@ -667,7 +667,7 @@
     "colorSchemes": {
       "useWallpaperColors": true,
       "predefinedScheme": "Noctalia (default)",
-      "darkMode": false,
+      "darkMode": true,
       "schedulingMode": "location",
       "manualSunrise": "06:30",
       "manualSunset": "18:30",
@@ -747,12 +747,12 @@
   },
   "state": {
     "doNotDisturb": false,
-    "noctaliaPerformanceMode": false,
+    "noctaliaPerformanceMode": true,
     "barVisible": true,
     "openedPanel": "",
     "lockScreenActive": false,
     "wallpapers": {
-      "eDP-1": "/home/kalitsune/.config/wallpaper.png"
+      "eDP-1": "/nix/store/f475a426f2g78gk0imnbx46fsclp8ajj-wallpapers-unstable-2026-07-09/share/wallpapers/vibrant-nature/melanie-magdalena-KpBAYMNf9Tw-unsplash.jpg"
     },
     "desktopWidgetsEditMode": false,
     "display": {
@@ -773,7 +773,7 @@
       }
     },
     "notificationsState": {
-      "lastSeenTs": 1784548816000
+      "lastSeenTs": 1785243808000
     },
     "changelogState": {
       "lastSeenVersion": "v4.7.7"
