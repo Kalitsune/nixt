@@ -7,7 +7,7 @@
     }:
     let
       sys = pkgs.stdenv.hostPlatform.system;
-      change-wallpaper = self.packages.${sys}.change-wallpaper-full;
+      change-wallpaper = self.packages.${sys}.change-wallpaper;
       noctalia = self.packages.${sys}.noctalia-shell;
     in
     {
@@ -21,7 +21,7 @@
         after = [ "graphical-session.target" ];
         wants = [ "graphical-session.target" ];
         script = ''
-          wallpaper=$(${lib.getExe change-wallpaper} --filter "$(cat "$HOME/.config/wallpaper-filter.txt" 2>/dev/null)")
+          wallpaper=$(${lib.getExe change-wallpaper} --root-dir github:kalitsune/wallpapers --filter "$(cat "$HOME/.config/wallpaper-filter.txt" 2>/dev/null)")
           ${lib.getExe noctalia} ipc call wallpaper set "$wallpaper" || true
         '';
         serviceConfig.Type = "oneshot";
@@ -104,8 +104,8 @@
     {
       packages = {
         inherit wallpapers;
-        change-wallpaper-full = mkChangeWallpaper "${wallpapers}/share/wallpapers" [ wallpapers ];
-        change-wallpaper-lite = mkChangeWallpaper "github:kalitsune/wallpapers" [ ];
+        change-wallpaper-bundled = mkChangeWallpaper "${wallpapers}/share/wallpapers" [ wallpapers ];
+        change-wallpaper = mkChangeWallpaper "github:kalitsune/wallpapers" [ ];
       };
     };
 }
