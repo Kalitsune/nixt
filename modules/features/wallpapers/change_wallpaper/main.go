@@ -27,6 +27,16 @@ func orDefault(value string, def string) string {
 	return value
 }
 
+func envInt(key string, def int) int {
+	if v := os.Getenv(key); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	return def
+}
+
 type githubSource struct {
 	owner string
 	repo  string
@@ -124,9 +134,9 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 
 func main() {
 	root_dir := flag.String("root-dir", orDefault(os.Getenv("WALLPAPER_ROOT"), "."), "Path to the wallpaper repository, or github:owner/repo")
-	filter := flag.String("filter", "", "Select specific wallpaper collections (e.g. \"digital-art/cosmic-journeys\")")
-	number := flag.Int("number", -1, "If set, selects the n-th file, otherwise defaults to random.")
-	output := flag.String("output", "", "Path where the wallpaper should be set (supported formats: png, jpg, jpeg, gif)")
+	filter := flag.String("filter", os.Getenv("WALLPAPER_FILTER"), "Select specific wallpaper collections (e.g. \"digital-art/cosmic-journeys\")")
+	number := flag.Int("number", envInt("WALLPAPER_NUMBER", -1), "If set, selects the n-th file, otherwise defaults to random.")
+	output := flag.String("output", os.Getenv("WALLPAPER_OUTPUT"), "Path where the wallpaper should be set (supported formats: png, jpg, jpeg, gif)")
 
 	flag.Parse()
 

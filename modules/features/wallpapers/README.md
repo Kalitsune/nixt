@@ -13,15 +13,18 @@ change-wallpaper [flags]
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--root-dir` | `$WALLPAPER_ROOT` or `.` | Path to the wallpaper repository, or `github:owner/repo` to pull directly from GitHub |
-| `--filter` | _(none)_ | Restrict selection to a specific collection (e.g. `digital-art/cosmic-journeys`) |
-| `--number` | _(random)_ | Select the n-th wallpaper instead of a random one |
-| `--output` | _(none)_ | Write the wallpaper to this path, converting format if needed |
+| `--filter` | `$WALLPAPER_FILTER` | Restrict selection to a specific collection (e.g. `digital-art/cosmic-journeys`) |
+| `--number` | `$WALLPAPER_NUMBER` or _(random)_ | Select the n-th wallpaper instead of a random one |
+| `--output` | `$WALLPAPER_OUTPUT` | Write the wallpaper to this path, converting format if needed |
 
 ### Environment variables
 
 | Variable | Description |
 |----------|-------------|
 | `WALLPAPER_ROOT` | Default value for `--root-dir` (accepts both local paths and `github:owner/repo`) |
+| `WALLPAPER_FILTER` | Default value for `--filter` |
+| `WALLPAPER_NUMBER` | Default value for `--number` (integer) |
+| `WALLPAPER_OUTPUT` | Default value for `--output` |
 | `GITHUB_TOKEN` | Optional GitHub personal access token — set to avoid rate limits when using a GitHub source |
 
 ### Supported input formats
