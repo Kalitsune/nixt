@@ -60,6 +60,7 @@
       kustomize
       talosctl
       kubectl
+      sops
     ];
   };
 
