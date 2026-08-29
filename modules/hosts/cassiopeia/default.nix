@@ -21,6 +21,7 @@
       self.nixosModules.ios
       self.nixosModules.voxel-games
       self.nixosModules.vintagestory
+      self.nixosModules.k8s
     ];
   };
 }

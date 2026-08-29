@@ -53,6 +53,16 @@
     ];
   };
 
+  flake.nixosModules.k8s = { pkgs, ... }: {
+    environment.systemPackages = with pkgs; [
+      kubernetes-helm
+      fluxcd
+      kustomize
+      talosctl
+      kubectl
+    ];
+  };
+
   flake.nixosModules.voxel-games = { pkgs, ... }: {
     environment.systemPackages = [ pkgs.prismlauncher ];
   };
