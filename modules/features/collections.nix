@@ -61,6 +61,7 @@
       talosctl
       kubectl
       sops
+      age
     ];
   };
 
