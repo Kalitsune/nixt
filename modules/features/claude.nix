@@ -27,9 +27,5 @@
           };
         };
       };
-
-      packages.claude-desktop = inputs.claude-desktop-linux.packages.${system}.claude-desktop.override {
-        nodePackages = { inherit (pkgs) asar; };
-      };
     };
 }

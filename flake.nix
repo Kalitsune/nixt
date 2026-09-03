@@ -14,11 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-desktop-linux = {
-      url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     hermes-agent.url = "github:NousResearch/hermes-agent";
 
     cypkgs = {

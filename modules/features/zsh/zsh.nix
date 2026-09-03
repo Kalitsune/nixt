@@ -48,7 +48,6 @@
             self'.packages.editor
             self'.packages.git # TODO: Maybe add support for Jujutsu?
             pkgs.git-lfs
-            self'.packages.claude-code
 
             # Build systems
             pkgs.gnumake
