@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -106,6 +107,113 @@ func listGithubCandidates(gh githubSource, filter string) []string {
 	return candidates
 }
 
+type lfsPointer struct {
+	OID  string
+	Size int64
+}
+
+func parseLFSPointer(data []byte) (*lfsPointer, bool) {
+	const magic = "version https://git-lfs.github.com/spec/v1"
+	s := strings.TrimSpace(string(data))
+	if !strings.HasPrefix(s, magic) {
+		return nil, false
+	}
+	p := &lfsPointer{}
+	for _, line := range strings.Split(s, "\n") {
+		if after, ok := strings.CutPrefix(line, "oid sha256:"); ok {
+			p.OID = strings.TrimSpace(after)
+		} else if after, ok := strings.CutPrefix(line, "size "); ok {
+			fmt.Sscanf(strings.TrimSpace(after), "%d", &p.Size)
+		}
+	}
+	if p.OID == "" {
+		return nil, false
+	}
+	return p, true
+}
+
+func downloadLFSObject(gh githubSource, ptr *lfsPointer, ext string) (string, error) {
+	type lfsObj struct {
+		OID  string `json:"oid"`
+		Size int64  `json:"size"`
+	}
+	reqBody, _ := json.Marshal(struct {
+		Operation string   `json:"operation"`
+		Transfers []string `json:"transfers"`
+		Objects   []lfsObj `json:"objects"`
+	}{
+		Operation: "download",
+		Transfers: []string{"basic"},
+		Objects:   []lfsObj{{OID: ptr.OID, Size: ptr.Size}},
+	})
+
+	batchURL := fmt.Sprintf("https://github.com/%s/%s.git/info/lfs/objects/batch", gh.owner, gh.repo)
+	req, err := http.NewRequest("POST", batchURL, bytes.NewReader(reqBody))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/vnd.git-lfs+json")
+	req.Header.Set("Accept", "application/vnd.git-lfs+json")
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("LFS batch request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("LFS batch returned status %d", resp.StatusCode)
+	}
+
+	var batchResp struct {
+		Objects []struct {
+			Actions struct {
+				Download struct {
+					Href string `json:"href"`
+				} `json:"download"`
+			} `json:"actions"`
+			Error *struct {
+				Message string `json:"message"`
+			} `json:"error"`
+		} `json:"objects"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&batchResp); err != nil {
+		return "", fmt.Errorf("decode LFS batch response: %w", err)
+	}
+	if len(batchResp.Objects) == 0 {
+		return "", fmt.Errorf("LFS batch returned no objects")
+	}
+	obj := batchResp.Objects[0]
+	if obj.Error != nil {
+		return "", fmt.Errorf("LFS error: %s", obj.Error.Message)
+	}
+
+	dlResp, err := http.Get(obj.Actions.Download.Href)
+	if err != nil {
+		return "", fmt.Errorf("LFS download: %w", err)
+	}
+	defer dlResp.Body.Close()
+
+	if dlResp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("LFS download returned status %d", dlResp.StatusCode)
+	}
+
+	tmp, err := os.CreateTemp("", "wallpaper-*"+ext)
+	if err != nil {
+		return "", fmt.Errorf("create temp file: %w", err)
+	}
+	defer tmp.Close()
+
+	if _, err := io.Copy(tmp, dlResp.Body); err != nil {
+		os.Remove(tmp.Name())
+		return "", fmt.Errorf("write temp file: %w", err)
+	}
+	return tmp.Name(), nil
+}
+
 func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/HEAD/%s", gh.owner, gh.repo, filePath)
 	resp, err := githubRequest(url)
@@ -118,6 +226,16 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 		return "", fmt.Errorf("download returned status %d", resp.StatusCode)
 	}
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read response: %w", err)
+	}
+
+	// Detect Git LFS pointer files and fetch the real object via the batch API.
+	if ptr, ok := parseLFSPointer(body); ok {
+		return downloadLFSObject(gh, ptr, filepath.Ext(filePath))
+	}
+
 	ext := filepath.Ext(filePath)
 	tmp, err := os.CreateTemp("", "wallpaper-*"+ext)
 	if err != nil {
@@ -125,7 +243,7 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 	}
 	defer tmp.Close()
 
-	if _, err := io.Copy(tmp, resp.Body); err != nil {
+	if _, err := tmp.Write(body); err != nil {
 		os.Remove(tmp.Name())
 		return "", fmt.Errorf("write temp file: %w", err)
 	}
