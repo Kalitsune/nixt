@@ -6,8 +6,10 @@
 {
   flake.nixosConfigurations.Cassiopeia = inputs.nixpkgs.lib.nixosSystem {
     modules = [
+      inputs.home-manager.nixosModules.home-manager
       inputs.nix-flatpak.nixosModules.nix-flatpak
       self.nixosModules.CassiopeiaConfiguration # configuration.nix
+      self.nixosModules.CassiopeiaHome
 
       # Flake config
       self.nixosModules.nix

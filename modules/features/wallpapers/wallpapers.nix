@@ -1,5 +1,5 @@
 { self, ... }: {
-  flake.nixosModules.wallpapers =
+  flake.homeManagerModules.wallpapers =
     {
       pkgs,
       lib,
@@ -9,32 +9,47 @@
       sys = pkgs.stdenv.hostPlatform.system;
       change-wallpaper = self.packages.${sys}.change-wallpaper;
       noctalia = self.packages.${sys}.noctalia-shell;
+      wallpaper-script = pkgs.writeShellScript "wallpaper-changer" ''
+        wallpaper=$(${lib.getExe change-wallpaper} --root-dir github:kalitsune/wallpapers --filter "$(cat "$HOME/.config/wallpaper-filter.txt" 2>/dev/null)")
+        ${lib.getExe noctalia} ipc call wallpaper set "$wallpaper" || true
+      '';
+    in
+    {
+      systemd.user.services.wallpaper-changer = {
+        Unit = {
+          Description = "Change desktop wallpaper";
+          After = [ "graphical-session.target" ];
+          Wants = [ "graphical-session.target" ];
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = "${wallpaper-script}";
+        };
+      };
+
+      systemd.user.timers.wallpaper-changer = {
+        Unit.Description = "Periodically change desktop wallpaper";
+        Timer = {
+          OnStartupSec = "5";
+          OnUnitActiveSec = "1800";
+        };
+        Install.WantedBy = [ "timers.target" ];
+      };
+    };
+
+  flake.nixosModules.wallpapers =
+    {
+      pkgs,
+      ...
+    }:
+    let
+      sys = pkgs.stdenv.hostPlatform.system;
     in
     {
       environment.systemPackages = [
         self.packages.${sys}.wallpapers
-        change-wallpaper
+        self.packages.${sys}.change-wallpaper
       ];
-
-      systemd.user.services.wallpaper-changer = {
-        description = "Change desktop wallpaper";
-        after = [ "graphical-session.target" ];
-        wants = [ "graphical-session.target" ];
-        script = ''
-          wallpaper=$(${lib.getExe change-wallpaper} --root-dir github:kalitsune/wallpapers --filter "$(cat "$HOME/.config/wallpaper-filter.txt" 2>/dev/null)")
-          ${lib.getExe noctalia} ipc call wallpaper set "$wallpaper" || true
-        '';
-        serviceConfig.Type = "oneshot";
-      };
-
-      systemd.user.timers.wallpaper-changer = {
-        description = "Periodically change desktop wallpaper";
-        wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnStartupSec = "5";
-          OnUnitActiveSec = "1800";
-        };
-      };
     };
 
   perSystem =
