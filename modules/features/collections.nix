@@ -32,6 +32,7 @@
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor
       self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
       pkgs.beeper
+      pkgs.element-desktop
       pkgs.filezilla
       pkgs.localsend
 
