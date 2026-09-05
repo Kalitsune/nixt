@@ -11,7 +11,7 @@
       common.mkShell {
         desktop = nixtPkgs.niri.wrap {
           settings.binds = {
-            "Mod+Enter".spawn-sh = pkgs.lib.getExe common.terminal;
+            "Mod+Return".spawn-sh = pkgs.lib.getExe common.terminal;
 
             "Mod+Shift+E".spawn-sh = "${noctalia_exe} ipc call sessionMenu toggle";
 
