@@ -32,6 +32,7 @@
   outputs =
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (
-      inputs.import-tree.matchNot ".*/shell\\.nix" ./modules
+      # shell.nix and nixt-pie.nix are plain nix expressions, not flake-parts modules.
+      inputs.import-tree.matchNot ".*/shell\\.nix|.*/nixt-pie\\.nix" ./modules
     );
 }

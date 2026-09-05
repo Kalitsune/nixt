@@ -76,7 +76,6 @@
               "Print".screenshot = _: {
                 props.show-pointer = false;
               };
-              "Mod+C".spawn-sh = lib.getExe pkgs.normcap;
 
               # Window Controls
               "Mod+X".close-window = _: { };
