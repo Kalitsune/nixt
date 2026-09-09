@@ -9,17 +9,18 @@ in
 {
   inherit system nixt pie terminal;
 
-  mkShell =
-    extraPackages:
+  mkLauncher =
+    name: extraPackages:
     let
       packages = basePackages // extraPackages;
     in
-    pkgs.mkShell {
-      buildInputs = [
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [
         packages.terminal
         packages.editor
       ];
-      shellHook = ''
+      text = ''
         export SHELL=${pkgs.lib.getExe packages.shell}
         exec ${pkgs.lib.getExe packages.desktop}
       '';

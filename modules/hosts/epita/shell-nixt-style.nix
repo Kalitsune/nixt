@@ -1,6 +1,6 @@
 { ... }:
 {
   perSystem = { pkgs, ... }: {
-    devShells.epita-nixt = (import ./nixt-pie.nix { inherit pkgs; }).mkShell { };
+    packages.epita-nixt = (import ./nixt-pie.nix { inherit pkgs; }).mkLauncher "epita-nixt" { };
   };
 }

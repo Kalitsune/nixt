@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"syscall"
 
@@ -14,12 +13,11 @@ import (
 )
 
 const (
-	flakeURL      = "github:kalitsune/nixt"
-	installerPkg  = "pie-installer"
-	confsRelDir   = "afs/.confs"
-	installScript = "install.sh"
-	commandFile   = "pie-installer-cmd"
-	tty2Device    = "/dev/tty2"
+	flakeURL    = "github:kalitsune/nixt"
+	installerPkg = "pie-installer"
+	confsRelDir  = "afs/.confs"
+	commandFile  = "pie-installer-cmd"
+	tty2Device   = "/dev/tty2"
 )
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -133,27 +131,24 @@ type tuiResult struct {
 }
 
 type model struct {
-	paginator    paginator.Model
-	step         stepID
-	totalSteps   int
-	choice       int
-	result       tuiResult
-	cfg          config
-	hasInstallSh bool
+	paginator  paginator.Model
+	step       stepID
+	totalSteps int
+	choice     int
+	result     tuiResult
+	cfg        config
 }
 
 func newModel(cfg config) model {
-	hasInstallSh := fileExists(installScriptPath())
-
 	// Welcome + picker always shown.
 	// --save: welcome → picker → disclaimer (3)
-	// --pick or no install.sh: welcome → picker (2)
-	// normal + install.sh: welcome → picker → autoboot (3, grows to 4 if user saves)
+	// --pick: welcome → picker (2)
+	// normal: welcome → picker → autoboot (3, grows to 4 if user saves)
 	var totalSteps int
 	switch {
 	case cfg.save:
 		totalSteps = 3
-	case cfg.pick || !hasInstallSh:
+	case cfg.pick:
 		totalSteps = 2
 	default:
 		totalSteps = 3
@@ -166,10 +161,9 @@ func newModel(cfg config) model {
 	p.InactiveDot = dimStyle.Render("○")
 
 	return model{
-		paginator:    p,
-		totalSteps:   totalSteps,
-		cfg:          cfg,
-		hasInstallSh: hasInstallSh,
+		paginator:  p,
+		totalSteps: totalSteps,
+		cfg:        cfg,
 	}
 }
 
@@ -185,7 +179,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter", "y", " ":
 				m.step = stepStylePicker
 				m.paginator.Page++
-				m.choice = 0
+				m.choice = 1 // default to Pie style
 			case "n", "q", "esc", "ctrl+c":
 				m.result.aborted = true
 				return m, tea.Quit
@@ -211,7 +205,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.choice = 0
 				if m.cfg.save {
 					m.step = stepDisclaimer
-				} else if m.hasInstallSh && !m.cfg.pick {
+				} else if !m.cfg.pick {
 					m.step = stepAutoboot
 				} else {
 					return m, tea.Quit
@@ -371,72 +365,22 @@ func homeDir() string {
 	return home
 }
 
-func installScriptPath() string {
-	return homeDir() + "/" + confsRelDir + "/" + installScript
-}
-
 func commandFilePath() string {
 	return homeDir() + "/" + confsRelDir + "/" + commandFile
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
 func writeAutoboot(style string) {
 	cmdFilePath := commandFilePath()
-	scriptPath := installScriptPath()
 	fullCommand := fmt.Sprintf("nix run %s#%s --style=%s", flakeURL, installerPkg, style)
-
 	if err := os.WriteFile(cmdFilePath, []byte(fullCommand+"\n"), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "pie-installer: failed to write command file: %v\n", err)
 		return
 	}
-
-	if !fileExists(scriptPath) {
-		fmt.Printf("Auto-boot command saved to %s\n", cmdFilePath)
-		return
-	}
-
-	if err := updateInstallScript(scriptPath, fullCommand); err != nil {
-		fmt.Fprintf(os.Stderr, "pie-installer: failed to update %s: %v\n", scriptPath, err)
-		return
-	}
-
 	fmt.Printf("Auto-boot enabled: %s\n", fullCommand)
 }
 
-func updateInstallScript(path, command string) error {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	lines := strings.Split(string(data), "\n")
-	piePattern := regexp.MustCompile(`nix run.*#pie-installer`)
-
-	replaced := false
-	for i, line := range lines {
-		if piePattern.MatchString(line) {
-			lines[i] = command
-			replaced = true
-			break
-		}
-	}
-
-	if !replaced {
-		for len(lines) > 0 && lines[len(lines)-1] == "" {
-			lines = lines[:len(lines)-1]
-		}
-		lines = append(lines, command, "")
-	}
-
-	return os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0644)
-}
-
 func runNixShell(style string) {
-	args := []string{"nix", "develop", "--impure",
+	args := []string{"nix", "run", "--impure",
 		fmt.Sprintf("%s#epita-%s", flakeURL, style)}
 
 	nixPath, err := exec.LookPath("nix")
@@ -459,7 +403,7 @@ func handleDryRun(cfg config) {
 		switch {
 		case cfg.save:
 			fmt.Println("[DRY RUN]   Page 3: Disclaimer (saving enabled via --save)")
-		case !cfg.pick && fileExists(installScriptPath()):
+		case !cfg.pick:
 			fmt.Println("[DRY RUN]   Page 3: Auto-boot prompt")
 			fmt.Println("[DRY RUN]   Page 4: Disclaimer (only if user chooses to save)")
 		}
@@ -467,24 +411,16 @@ func handleDryRun(cfg config) {
 
 	style := cfg.style
 	if style == "" {
-		style = "nixt"
-		fmt.Println("[DRY RUN] No style given — defaulting to 'nixt' for dry-run output")
+		style = "pie"
+		fmt.Println("[DRY RUN] No style given — defaulting to 'pie' for dry-run output")
 	}
 
-	switch {
-	case cfg.save:
+	if cfg.save || (!cfg.pick && !cfg.styleFromCLI) {
 		cmd := fmt.Sprintf("nix run %s#%s --style=%s", flakeURL, installerPkg, style)
 		fmt.Printf("[DRY RUN] Would write to %s:\n  %s\n", commandFilePath(), cmd)
-		fmt.Printf("[DRY RUN] Would update %s with:\n  %s\n", installScriptPath(), cmd)
-	case !cfg.pick && !cfg.styleFromCLI:
-		if fileExists(installScriptPath()) {
-			fmt.Println("[DRY RUN] Would prompt for auto-boot (depending on user choice)")
-		} else {
-			fmt.Printf("[DRY RUN] %s not found — would skip auto-boot prompt\n", installScriptPath())
-		}
 	}
 
-	fmt.Printf("[DRY RUN] Would exec: nix develop --impure %s#epita-%s\n", flakeURL, style)
+	fmt.Printf("[DRY RUN] Would exec: nix run --impure %s#epita-%s\n", flakeURL, style)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
