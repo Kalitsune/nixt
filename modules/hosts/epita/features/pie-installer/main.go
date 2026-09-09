@@ -226,7 +226,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.choice++
 				}
 			case "enter", " ":
-				if m.choice == 0 {
+				if m.choice == 1 {
 					// User wants to save — show disclaimer before committing
 					m.totalSteps++
 					m.paginator.TotalPages++
@@ -326,7 +326,7 @@ func (m model) viewStylePicker() string {
 }
 
 func (m model) viewAutoboot() string {
-	opts := []string{"Yes, enable auto-boot", "No, keep manual"}
+	opts := []string{"No, keep manual", "Yes, enable auto-boot"}
 
 	var sb strings.Builder
 	sb.WriteString(titleStyle.Render("Enable auto-boot at login?") + "\n")
