@@ -11,10 +11,12 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/h2non/bimg"
 )
@@ -250,52 +252,131 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 	return tmp.Name(), nil
 }
 
-func main() {
-	root_dir := flag.String("root-dir", orDefault(os.Getenv("WALLPAPER_ROOT"), "."), "Path to the wallpaper repository, or github:owner/repo")
-	filter := flag.String("filter", os.Getenv("WALLPAPER_FILTER"), "Select specific wallpaper collections (e.g. \"digital-art/cosmic-journeys\")")
-	number := flag.Int("number", envInt("WALLPAPER_NUMBER", -1), "If set, selects the n-th file, otherwise defaults to random.")
-	output := flag.String("output", os.Getenv("WALLPAPER_OUTPUT"), "Path where the wallpaper should be set (supported formats: png, jpg, jpeg, gif)")
+func applyWallpaper(de, filePath string) error {
+	switch de {
+	case "auto":
+		if _, err := exec.LookPath("noctalia"); err == nil {
+			return runNoctalia(filePath)
+		}
+		return fmt.Errorf("could not auto-detect a supported desktop environment")
+	case "noctalia":
+		return runNoctalia(filePath)
+	default:
+		return fmt.Errorf("unknown desktop environment: %s", de)
+	}
+}
 
-	flag.Parse()
+func runNoctalia(filePath string) error {
+	cmd := exec.Command("noctalia", "ipc", "call", "wallpaper", "set", filePath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
-	isGithub, gh, localPath := parseSource(*root_dir)
+func readFilterFile(p string) string {
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
+}
 
+func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, apply string, number int) {
 	var candidates []string
 	if isGithub {
-		candidates = listGithubCandidates(gh, *filter)
+		candidates = listGithubCandidates(gh, filter)
 	} else {
-		candidates = list_candidates(path.Join(localPath, *filter))
+		candidates = list_candidates(path.Join(localPath, filter))
 	}
 
 	if len(candidates) == 0 {
 		log.Fatal("Couldn't find any wallpaper, please ensure that your filter is valid!")
 	}
 
-	if *number == -1 {
-		*number = rand.Int()
+	n := number
+	if n == -1 {
+		n = rand.Int()
 	}
+	picked := candidates[n%len(candidates)]
 
-	picked := candidates[*number%len(candidates)]
+	var srcPath string
+	isTmp := false
 
 	if isGithub {
-		tmpPath, err := downloadGithubImage(gh, picked)
+		tmp, err := downloadGithubImage(gh, picked)
 		if err != nil {
 			log.Fatalf("Failed to download wallpaper: %v", err)
 		}
-		if *output == "" {
-			fmt.Printf("%s", tmpPath)
-		} else {
-			if err := convertImage(tmpPath, *output); err != nil {
-				os.Remove(tmpPath)
-				log.Fatalf("Failed to convert wallpaper: %v", err)
+		srcPath = tmp
+		isTmp = true
+	} else {
+		srcPath = picked
+	}
+
+	finalPath := srcPath
+	if output != "" {
+		if err := convertImage(srcPath, output); err != nil {
+			if isTmp {
+				os.Remove(srcPath)
 			}
-			os.Remove(tmpPath)
+			log.Fatalf("Failed to convert wallpaper: %v", err)
+		}
+		if isTmp {
+			os.Remove(srcPath)
+			isTmp = false
+		}
+		finalPath = output
+	}
+
+	if apply != "" {
+		if err := applyWallpaper(apply, finalPath); err != nil {
+			log.Printf("Failed to apply wallpaper: %v", err)
+		}
+		if isTmp {
+			os.Remove(finalPath)
 		}
 	} else {
-		if *output == "" {
-			fmt.Printf("%s", picked)
-		} else {
-			convertImage(picked, *output)
+		fmt.Printf("%s", finalPath)
+	}
+}
+
+func envDuration(key string, def time.Duration) time.Duration {
+	if v := os.Getenv(key); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			return d
+		}
+	}
+	return def
+}
+
+func resolveFilter(filterFlag, filterFile string) string {
+	if filterFile != "" {
+		return readFilterFile(filterFile)
+	}
+	return filterFlag
+}
+
+func main() {
+	rootDir := flag.String("root-dir", orDefault(os.Getenv("WALLPAPER_ROOT"), "."), "Path to the wallpaper repository, or github:owner/repo")
+	filter := flag.String("filter", os.Getenv("WALLPAPER_FILTER"), "Select specific wallpaper collections (e.g. \"digital-art/cosmic-journeys\")")
+	filterFile := flag.String("filter-file", os.Getenv("WALLPAPER_FILTER_FILE"), "File whose contents are used as the filter (re-read each tick in daemon mode)")
+	number := flag.Int("number", envInt("WALLPAPER_NUMBER", -1), "If set, selects the n-th file, otherwise defaults to random.")
+	output := flag.String("output", os.Getenv("WALLPAPER_OUTPUT"), "Path where the wallpaper should be saved (supported formats: png, jpg, jpeg, gif)")
+	apply := flag.String("apply", os.Getenv("WALLPAPER_APPLY"), "Apply the wallpaper to the desktop: \"noctalia\" or \"auto\" to detect")
+	daemon := flag.Bool("daemon", false, "Run continuously, changing the wallpaper at each interval")
+	interval := flag.Duration("interval", envDuration("WALLPAPER_INTERVAL", 30*time.Minute), "Time between wallpaper changes in daemon mode (e.g. 30m, 1h)")
+
+	flag.Parse()
+
+	isGithub, gh, localPath := parseSource(*rootDir)
+
+	changeWallpaper(isGithub, gh, localPath, resolveFilter(*filter, *filterFile), *output, *apply, *number)
+
+	if *daemon {
+		ticker := time.NewTicker(*interval)
+		defer ticker.Stop()
+		for range ticker.C {
+			changeWallpaper(isGithub, gh, localPath, resolveFilter(*filter, *filterFile), *output, *apply, *number)
 		}
 	}
 }

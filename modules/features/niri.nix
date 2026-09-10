@@ -33,6 +33,13 @@
             noctalia_exe = lib.getExe self'.packages.noctalia-shell;
             wpctl_exe = lib.getExe' pkgs.wireplumber "wpctl";
             vicinae = lib.getExe self'.packages.vicinae;
+            wallpaper-daemon = pkgs.writeShellScript "wallpaper-daemon" ''
+              export PATH="${lib.makeBinPath [ self'.packages.noctalia-shell ]}:$PATH"
+              exec ${lib.getExe self'.packages.change-wallpaper} \
+                --filter-file="$HOME/.config/wallpaper-filter.txt" \
+                --apply=noctalia \
+                --daemon
+            '';
           in
           {
             spawn-at-startup = [
@@ -41,6 +48,7 @@
                 (lib.getExe self'.packages.vicinae)
                 "server"
               ]
+              "${wallpaper-daemon}"
             ];
 
             xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;

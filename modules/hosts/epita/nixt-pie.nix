@@ -22,15 +22,19 @@ in
     niri = extra:
       let
         kb = pkgs.lib.recursiveUpdate keybinds extra;
-      in
-      nixt.inputs.wrapper-modules.wrappers.niri.wrap {
-        inherit pkgs;
-        settings.binds = {
+        epitaBinds = {
           "${kb.terminal.key}".spawn-sh    = cmd kb.terminal;
           "${kb.launcher.key}".spawn-sh    = cmd kb.launcher;
           "${kb.sessionMenu.key}".spawn-sh = cmd kb.sessionMenu;
           "${kb.closeWindow.key}".close-window = _: { };
         };
+        mergedBinds =
+          (pkgs.lib.filterAttrs (k: _: !(epitaBinds ? ${k}))
+            nixtPkgs.niri.configuration.settings.binds)
+          // epitaBinds;
+      in
+      nixtPkgs.niri.wrap {
+        settings.binds = pkgs.lib.mkForce mergedBinds;
       };
   };
 
