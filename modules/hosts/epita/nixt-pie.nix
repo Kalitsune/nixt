@@ -36,14 +36,20 @@ in
             (k: _: !(epitaBinds ? ${k}) && !(builtins.elem k extraUnbinds))
             nixtPkgs.niri.configuration.settings.binds)
           // epitaBinds;
+        noctalia_bin = "${nixtPkgs.noctalia-shell}/bin";
+        changeWp = pkgs.lib.getExe nixtPkgs.change-wallpaper;
+        # Strip any wallpaper-daemon inherited from an older base niri package.
+        filteredSpawnAt = pkgs.lib.filter
+          (x: !(builtins.isString x && pkgs.lib.hasSuffix "wallpaper-daemon" x))
+          nixtPkgs.niri.configuration.settings.spawn-at-startup;
       in
       nixtPkgs.niri.wrap {
         settings = {
-          # Load the user's ~/.Xresources so urxvt picks up their font/colors.
-          # xwayland-satellite handles the DISPLAY socket, so xrdb can connect
-          # at startup without needing Xwayland to be pre-running.
+          spawn-at-startup = pkgs.lib.mkForce filteredSpawnAt;
           spawn-sh-at-startup = [
             "${pkgs.xorg.xrdb}/bin/xrdb -merge \"$HOME/.Xresources\" 2>/dev/null || true"
+            # Wait 3 s for noctalia to finish init before the first IPC wallpaper call.
+            "sleep 3; export PATH=\"${noctalia_bin}:$PATH\"; exec ${changeWp} --filter-file=\"$HOME/.config/wallpaper-filter.txt\" --apply=noctalia --daemon"
           ];
           binds = pkgs.lib.mkForce mergedBinds;
         };
