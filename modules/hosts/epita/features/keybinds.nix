@@ -28,6 +28,7 @@
     key     = "Mod+Shift+E";
   };
   closeWindow = {
-    key = "Mod+Shift+Q";
+    key    = "Mod+Shift+Q";
+    unbind = [ "Mod+X" "Mod+Shift+X" ];
   };
 }

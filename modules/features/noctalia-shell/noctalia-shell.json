@@ -689,14 +689,14 @@
       "manualSunset": "18:30"
     },
     "hooks": {
-      "enabled": false,
+      "enabled": true,
       "wallpaperChange": "",
       "darkModeChange": "",
       "screenLock": "",
       "screenUnlock": "",
       "performanceModeEnabled": "",
       "performanceModeDisabled": "",
-      "startup": "",
+      "startup": "change-wallpaper --filter-file=\"$HOME/.config/wallpaper-filter.txt\" --apply=noctalia --daemon",
       "session": "",
       "colorGeneration": ""
     },

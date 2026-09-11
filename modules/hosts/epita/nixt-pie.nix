@@ -28,13 +28,25 @@ in
           "${kb.sessionMenu.key}".spawn-sh = cmd kb.sessionMenu;
           "${kb.closeWindow.key}".close-window = _: { };
         };
+        extraUnbinds = pkgs.lib.flatten (
+          pkgs.lib.mapAttrsToList (_: action: action.unbind or []) kb
+        );
         mergedBinds =
-          (pkgs.lib.filterAttrs (k: _: !(epitaBinds ? ${k}))
+          (pkgs.lib.filterAttrs
+            (k: _: !(epitaBinds ? ${k}) && !(builtins.elem k extraUnbinds))
             nixtPkgs.niri.configuration.settings.binds)
           // epitaBinds;
       in
       nixtPkgs.niri.wrap {
-        settings.binds = pkgs.lib.mkForce mergedBinds;
+        settings = {
+          # Load the user's ~/.Xresources so urxvt picks up their font/colors.
+          # xwayland-satellite handles the DISPLAY socket, so xrdb can connect
+          # at startup without needing Xwayland to be pre-running.
+          spawn-sh-at-startup = [
+            "${pkgs.xorg.xrdb}/bin/xrdb -merge \"$HOME/.Xresources\" 2>/dev/null || true"
+          ];
+          binds = pkgs.lib.mkForce mergedBinds;
+        };
       };
   };
 

@@ -255,7 +255,7 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 func applyWallpaper(de, filePath string) error {
 	switch de {
 	case "auto":
-		if _, err := exec.LookPath("noctalia"); err == nil {
+		if _, err := exec.LookPath("noctalia-shell"); err == nil {
 			return runNoctalia(filePath)
 		}
 		return fmt.Errorf("could not auto-detect a supported desktop environment")
@@ -267,7 +267,7 @@ func applyWallpaper(de, filePath string) error {
 }
 
 func runNoctalia(filePath string) error {
-	cmd := exec.Command("noctalia", "ipc", "call", "wallpaper", "set", filePath)
+	cmd := exec.Command("noctalia-shell", "ipc", "call", "wallpaper", "set", filePath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
