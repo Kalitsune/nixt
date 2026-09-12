@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	flakeURL    = "github:kalitsune/nixt"
+	flakeURL     = "github:kalitsune/nixt"
 	installerPkg = "pie-installer"
 	confsRelDir  = "afs/.confs"
 	commandFile  = "pie-installer-cmd"
@@ -416,11 +416,11 @@ func handleDryRun(cfg config) {
 	}
 
 	if cfg.save || (!cfg.pick && !cfg.styleFromCLI) {
-		cmd := fmt.Sprintf("nix run %s#%s --style=%s", flakeURL, installerPkg, style)
+		cmd := fmt.Sprintf("nix profile add %s#%s --style=%s", flakeURL, installerPkg, style)
 		fmt.Printf("[DRY RUN] Would write to %s:\n  %s\n", commandFilePath(), cmd)
 	}
 
-	fmt.Printf("[DRY RUN] Would exec: nix run --impure %s#epita-%s\n", flakeURL, style)
+	fmt.Printf("[DRY RUN] Would exec: nix profile add --impure %s#epita-%s\n", flakeURL, style)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
