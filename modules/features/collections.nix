@@ -33,6 +33,7 @@
       self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
       pkgs.beeper
       pkgs.element-desktop
+      pkgs.fluffychat
       pkgs.filezilla
       pkgs.localsend
 
