@@ -177,5 +177,13 @@
             };
           };
       };
+      zsh.rc = [
+        {
+          lazy = false;
+          content = ''
+            alias deamonize="nix run ./nixt#niri -- msg action spawn-sh --"
+          '';
+        }
+      ];
     };
 }
