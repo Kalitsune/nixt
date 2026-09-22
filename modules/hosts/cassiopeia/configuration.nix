@@ -129,9 +129,6 @@
       # List packages installed in system profile. To search, run:
       # $ nix search wget
       environment.systemPackages = with pkgs; [
-        self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
         wireguard-tools
         openssl
         netcat-gnu
