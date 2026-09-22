@@ -52,6 +52,8 @@
   flake.nixosModules.education = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.anki
+      pkgs.obsidian
+      pkgs.zotero
     ];
   };
 
