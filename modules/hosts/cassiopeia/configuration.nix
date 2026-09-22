@@ -130,7 +130,7 @@
       # $ nix search wget
       environment.systemPackages = with pkgs; [
         self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
+        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
         wireguard-tools
         openssl
         netcat-gnu
