@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -9,6 +10,7 @@ import (
 	"io/fs"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -16,6 +18,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/h2non/bimg"
@@ -77,21 +80,21 @@ func githubRequest(url string) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-func listGithubCandidates(gh githubSource, filter string) []string {
+func listGithubCandidates(gh githubSource, filter string) ([]string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/HEAD?recursive=1", gh.owner, gh.repo)
 	resp, err := githubRequest(url)
 	if err != nil {
-		log.Fatalf("Failed to query GitHub API: %v", err)
+		return nil, fmt.Errorf("query GitHub API: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("GitHub API returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
 	}
 
 	var tree treeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tree); err != nil {
-		log.Fatalf("Failed to parse GitHub API response: %v", err)
+		return nil, fmt.Errorf("parse GitHub API response: %w", err)
 	}
 
 	var candidates []string
@@ -106,7 +109,7 @@ func listGithubCandidates(gh githubSource, filter string) []string {
 			candidates = append(candidates, entry.Path)
 		}
 	}
-	return candidates
+	return candidates, nil
 }
 
 type lfsPointer struct {
@@ -281,16 +284,17 @@ func readFilterFile(p string) string {
 	return strings.TrimSpace(string(data))
 }
 
-func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, apply string, number int) {
-	var candidates []string
-	if isGithub {
-		candidates = listGithubCandidates(gh, filter)
-	} else {
-		candidates = list_candidates(path.Join(localPath, filter))
+// changeWallpaper picks, converts and applies one wallpaper. Errors are
+// returned instead of fatal: in --daemon mode a transient failure (no
+// network, GitHub 5xx) must not kill the long-running process.
+func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, apply string, number int) (string, error) {
+	candidates, err := listCandidates(isGithub, gh, localPath, filter)
+	if err != nil {
+		return "", err
 	}
 
 	if len(candidates) == 0 {
-		log.Fatal("Couldn't find any wallpaper, please ensure that your filter is valid!")
+		return "", fmt.Errorf("couldn't find any wallpaper, please ensure that your filter is valid")
 	}
 
 	n := number
@@ -305,7 +309,7 @@ func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, 
 	if isGithub {
 		tmp, err := downloadGithubImage(gh, picked)
 		if err != nil {
-			log.Fatalf("Failed to download wallpaper: %v", err)
+			return "", fmt.Errorf("download wallpaper: %w", err)
 		}
 		srcPath = tmp
 		isTmp = true
@@ -315,29 +319,103 @@ func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, 
 
 	finalPath := srcPath
 	if output != "" {
-		if err := convertImage(srcPath, output); err != nil {
+		// Noctalia's WallpaperService compares PATHS, not file contents, and
+		// returns early when the new path equals the current one. Writing to a
+		// fixed --output would therefore apply once and then silently no-op
+		// forever. Write a uniquely named sibling instead, and prune the old
+		// ones so the directory does not grow without bound.
+		target := uniqueOutputPath(output)
+		if err := convertImage(srcPath, target); err != nil {
 			if isTmp {
 				os.Remove(srcPath)
 			}
-			log.Fatalf("Failed to convert wallpaper: %v", err)
+			return "", fmt.Errorf("convert wallpaper: %w", err)
 		}
 		if isTmp {
 			os.Remove(srcPath)
 			isTmp = false
 		}
-		finalPath = output
+		finalPath = target
 	}
 
 	if apply != "" {
 		if err := applyWallpaper(apply, finalPath); err != nil {
-			log.Printf("Failed to apply wallpaper: %v", err)
+			return "", fmt.Errorf("apply wallpaper: %w", err)
 		}
 		if isTmp {
 			os.Remove(finalPath)
 		}
+		if output != "" {
+			// Only prune after a successful apply: the file in use must stay.
+			pruneOldOutputs(output, finalPath)
+		}
 	} else {
 		fmt.Printf("%s", finalPath)
 	}
+	return picked, nil
+}
+
+// uniqueOutputPath turns ".../current.png" into ".../current-<nanos>.png" so
+// every change produces a path noctalia has not seen before.
+func uniqueOutputPath(output string) string {
+	ext := filepath.Ext(output)
+	base := strings.TrimSuffix(output, ext)
+	return fmt.Sprintf("%s-%d%s", base, time.Now().UnixNano(), ext)
+}
+
+// pruneOldOutputs deletes previously generated "<base>-*<ext>" files, keeping
+// only keep (the one just applied). Failures are ignored: a leftover file is
+// harmless compared with aborting a successful change.
+func pruneOldOutputs(output, keep string) {
+	ext := filepath.Ext(output)
+	base := strings.TrimSuffix(output, ext)
+	matches, err := filepath.Glob(base + "-*" + ext)
+	if err != nil {
+		return
+	}
+	for _, m := range matches {
+		if m != keep {
+			os.Remove(m)
+		}
+	}
+}
+
+// listCandidates returns every selectable image path of the configured
+// source, restricted to filter.
+func listCandidates(isGithub bool, gh githubSource, localPath, filter string) ([]string, error) {
+	if isGithub {
+		return listGithubCandidates(gh, filter)
+	}
+	return list_candidates(path.Join(localPath, filter))
+}
+
+// listCollections returns the sorted set of directories that actually hold
+// images, relative to the source root: exactly the values accepted as a
+// filter. Used by the noctalia panel to offer a pick list.
+func listCollections(isGithub bool, gh githubSource, localPath string) ([]string, error) {
+	candidates, err := listCandidates(isGithub, gh, localPath, "")
+	if err != nil {
+		return nil, err
+	}
+	seen := map[string]bool{}
+	var out []string
+	for _, c := range candidates {
+		if !isGithub {
+			rel, err := filepath.Rel(localPath, c)
+			if err != nil {
+				continue
+			}
+			c = rel
+		}
+		dir := filepath.Dir(c)
+		if dir == "." || dir == "/" || seen[dir] {
+			continue
+		}
+		seen[dir] = true
+		out = append(out, dir)
+	}
+	slices.Sort(out)
+	return out, nil
 }
 
 func envDuration(key string, def time.Duration) time.Duration {
@@ -356,6 +434,175 @@ func resolveFilter(filterFlag, filterFile string) string {
 	return filterFlag
 }
 
+// daemonState holds the mutable, socket-controllable state of a running
+// `--daemon` instance: the current filter and a channel to force an
+// immediate wallpaper change (used by the "trigger" socket command).
+type daemonState struct {
+	mu      sync.Mutex
+	filter  string
+	current string
+	// trigger carries a reply channel: the main loop sends back the change's
+	// error (nil on success) so a socket client learns whether it worked
+	// instead of getting an unconditional ok.
+	trigger chan chan error
+	// listFn lists the selectable collections of the configured source.
+	listFn func() ([]string, error)
+}
+
+func (s *daemonState) getFilter() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.filter
+}
+
+func (s *daemonState) setFilter(f string) {
+	s.mu.Lock()
+	s.filter = f
+	s.mu.Unlock()
+}
+
+func (s *daemonState) getCurrent() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.current
+}
+
+func (s *daemonState) setCurrent(p string) {
+	s.mu.Lock()
+	s.current = p
+	s.mu.Unlock()
+}
+
+// socketRequest/socketResponse are the JSON line protocol spoken over the
+// daemon's control socket. One JSON object per line in, one JSON object per
+// line out.
+type socketRequest struct {
+	Cmd   string `json:"cmd"`
+	Value string `json:"value,omitempty"`
+}
+
+type socketResponse struct {
+	Ok          bool     `json:"ok"`
+	Error       string   `json:"error,omitempty"`
+	Filter      string   `json:"filter,omitempty"`
+	Current     string   `json:"current,omitempty"`
+	Collections []string `json:"collections,omitempty"`
+}
+
+// serveSocket listens on a Unix socket and handles "trigger", "get_filter",
+// and "set_filter" commands against state, one JSON request/response per
+// line. Runs until the listener errors (e.g. socket removed).
+func serveSocket(socketPath string, state *daemonState) {
+	os.Remove(socketPath)
+	ln, err := net.Listen("unix", socketPath)
+	if err != nil {
+		log.Printf("Failed to listen on socket %s: %v", socketPath, err)
+		return
+	}
+	defer ln.Close()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Printf("Socket accept error: %v", err)
+			return
+		}
+		go handleSocketConn(conn, state)
+	}
+}
+
+// defaultSocketPath is where the daemon listens unless overridden (matches
+// the niri module's wallpaperSocket).
+func defaultSocketPath() string {
+	dir := os.Getenv("XDG_RUNTIME_DIR")
+	if dir == "" {
+		dir = os.TempDir()
+	}
+	return filepath.Join(dir, "change-wallpaper.sock")
+}
+
+// sendMsg connects to the daemon's control socket, writes one JSON line,
+// prints the one-line JSON reply, and returns the process exit code.
+func sendMsg(socketPath, msg string) int {
+	if !json.Valid([]byte(msg)) {
+		log.Fatalf("--msg is not valid JSON: %s", msg)
+	}
+	conn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		log.Fatalf("Failed to connect to daemon socket %s: %v", socketPath, err)
+	}
+	defer conn.Close()
+
+	if _, err := fmt.Fprintln(conn, msg); err != nil {
+		log.Fatalf("Failed to send message: %v", err)
+	}
+
+	scanner := bufio.NewScanner(conn)
+	if !scanner.Scan() {
+		log.Fatalf("No response from daemon: %v", scanner.Err())
+	}
+	fmt.Println(scanner.Text())
+
+	var resp socketResponse
+	if err := json.Unmarshal(scanner.Bytes(), &resp); err == nil && !resp.Ok {
+		return 1
+	}
+	return 0
+}
+
+func handleSocketConn(conn net.Conn, state *daemonState) {
+	defer conn.Close()
+	scanner := bufio.NewScanner(conn)
+	enc := json.NewEncoder(conn)
+
+	for scanner.Scan() {
+		var req socketRequest
+		resp := socketResponse{Ok: true}
+		if err := json.Unmarshal(scanner.Bytes(), &req); err != nil {
+			resp = socketResponse{Ok: false, Error: "invalid JSON: " + err.Error()}
+			enc.Encode(resp)
+			continue
+		}
+
+		switch req.Cmd {
+		case "trigger":
+			// Wait for the change to finish so the caller (bar widget) can
+			// show a real success/failure instead of fire-and-forget.
+			reply := make(chan error, 1)
+			select {
+			case state.trigger <- reply:
+				if err := <-reply; err != nil {
+					resp = socketResponse{Ok: false, Error: err.Error()}
+				} else {
+					resp.Current = state.getCurrent()
+				}
+			default:
+				resp = socketResponse{Ok: false, Error: "a change is already in progress"}
+			}
+		case "status":
+			resp.Filter = state.getFilter()
+			resp.Current = state.getCurrent()
+		case "get_filter":
+			resp.Filter = state.getFilter()
+		case "set_filter":
+			state.setFilter(req.Value)
+			resp.Filter = req.Value
+		case "list_collections":
+			cols, err := state.listFn()
+			if err != nil {
+				resp = socketResponse{Ok: false, Error: err.Error()}
+			} else {
+				resp.Collections = cols
+				resp.Filter = state.getFilter()
+			}
+		default:
+			resp = socketResponse{Ok: false, Error: "unknown command: " + req.Cmd}
+		}
+
+		enc.Encode(resp)
+	}
+}
+
 func main() {
 	rootDir := flag.String("root-dir", orDefault(os.Getenv("WALLPAPER_ROOT"), "."), "Path to the wallpaper repository, or github:owner/repo")
 	filter := flag.String("filter", os.Getenv("WALLPAPER_FILTER"), "Select specific wallpaper collections (e.g. \"digital-art/cosmic-journeys\")")
@@ -365,23 +612,86 @@ func main() {
 	apply := flag.String("apply", os.Getenv("WALLPAPER_APPLY"), "Apply the wallpaper to the desktop: \"noctalia\" or \"auto\" to detect")
 	daemon := flag.Bool("daemon", false, "Run continuously, changing the wallpaper at each interval")
 	interval := flag.Duration("interval", envDuration("WALLPAPER_INTERVAL", 30*time.Minute), "Time between wallpaper changes in daemon mode (e.g. 30m, 1h)")
+	retryInterval := flag.Duration("retry-interval", envDuration("WALLPAPER_RETRY_INTERVAL", 30*time.Second), "How soon to retry in daemon mode after a failed change (e.g. no network at login)")
+	socketPath := flag.String("socket", os.Getenv("WALLPAPER_SOCKET"), "Path to the daemon's Unix control socket. Defaults to $XDG_RUNTIME_DIR/change-wallpaper.sock (used both to serve it in --daemon mode and to reach it with --msg)")
+	msg := flag.String("msg", "", "Send one JSON line (e.g. '{\"cmd\":\"trigger\"}') to a running --daemon's control socket, print the reply, and exit; does not pick/apply a wallpaper itself")
 
 	flag.Parse()
 
+	if *socketPath == "" {
+		*socketPath = defaultSocketPath()
+	}
+
+	if *msg != "" {
+		os.Exit(sendMsg(*socketPath, *msg))
+	}
+
 	isGithub, gh, localPath := parseSource(*rootDir)
+	initialFilter := resolveFilter(*filter, *filterFile)
 
-	changeWallpaper(isGithub, gh, localPath, resolveFilter(*filter, *filterFile), *output, *apply, *number)
+	if !*daemon {
+		if _, err := changeWallpaper(isGithub, gh, localPath, initialFilter, *output, *apply, *number); err != nil {
+			log.Fatalf("Failed to change wallpaper: %v", err)
+		}
+		return
+	}
 
-	if *daemon {
-		ticker := time.NewTicker(*interval)
-		defer ticker.Stop()
-		for range ticker.C {
-			changeWallpaper(isGithub, gh, localPath, resolveFilter(*filter, *filterFile), *output, *apply, *number)
+	state := &daemonState{filter: initialFilter, trigger: make(chan chan error, 1)}
+	// change runs one wallpaper change with the filter currently in effect.
+	// A filter set via the socket takes priority; otherwise fall back to the
+	// flag/file-based filter, re-read on every change.
+	// ponytail: empty filter is ambiguous between "unset" and "explicitly
+	// cleared via socket"; falls back to flag/file. Add a tri-state if
+	// that distinction ever matters.
+	state.listFn = func() ([]string, error) {
+		return listCollections(isGithub, gh, localPath)
+	}
+	change := func() error {
+		f := state.getFilter()
+		if f == "" {
+			f = resolveFilter(*filter, *filterFile)
+		}
+		picked, err := changeWallpaper(isGithub, gh, localPath, f, *output, *apply, *number)
+		if err == nil {
+			state.setCurrent(picked)
+		}
+		return err
+	}
+
+	if *socketPath != "" {
+		go serveSocket(*socketPath, state)
+	}
+
+	ticker := time.NewTicker(*interval)
+	defer ticker.Stop()
+	// After a failure, retry well before the next regular tick: the usual
+	// cause is a transient one (no network yet at login, compositor not
+	// ready for the IPC call), which clears in seconds, not in --interval.
+	if err := change(); err != nil {
+		log.Printf("Failed to change wallpaper: %v", err)
+		ticker.Reset(*retryInterval)
+	}
+
+	for {
+		var reply chan error
+		select {
+		case <-ticker.C:
+		case reply = <-state.trigger:
+		}
+		err := change()
+		if err != nil {
+			log.Printf("Failed to change wallpaper: %v", err)
+			ticker.Reset(*retryInterval)
+		} else {
+			ticker.Reset(*interval)
+		}
+		if reply != nil {
+			reply <- err
 		}
 	}
 }
 
-func list_candidates(root_dir string) []string {
+func list_candidates(root_dir string) ([]string, error) {
 	candidates := []string{}
 
 	err := filepath.WalkDir(root_dir, func(path string, d fs.DirEntry, err error) error {
@@ -392,10 +702,10 @@ func list_candidates(root_dir string) []string {
 		return nil
 	})
 	if err != nil {
-		log.Fatal("Failed to list wallpapers")
+		return nil, fmt.Errorf("list wallpapers in %s: %w", root_dir, err)
 	}
 
-	return candidates
+	return candidates, nil
 }
 
 func convertImage(srcPath, dstPath string) error {
