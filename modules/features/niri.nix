@@ -22,6 +22,7 @@
       pkgs,
       lib,
       self',
+      config,
       ...
     }:
     {
@@ -30,11 +31,16 @@
 
         settings =
           let
+            blurOpacity = config.niri.blurOpacity;
             noctalia_exe = lib.getExe self'.packages.noctalia-shell;
             wpctl_exe = lib.getExe' pkgs.wireplumber "wpctl";
             vicinae = lib.getExe self'.packages.vicinae;
           in
           {
+            # The wallpaper daemon is NOT spawned here: spawn-at-startup is
+            # unsupervised, so a single crash left the wallpaper frozen until
+            # the next login. It runs as a restarted user unit instead, see
+            # modules/features/wallpapers/wallpapers.nix.
             spawn-at-startup = [
               noctalia_exe
               [
@@ -57,15 +63,105 @@
               };
             };
 
-            layout.gaps = 5;
-
-            # noctalia settings (see: https://docs.noctalia.dev/v4/getting-started/compositor-settings/niri/)
-            window-rule = {
-              geometry-corner-radius = 20;
-              clip-to-geometry = true;
+            layout = {
+              gaps = 7;
+              # Let the (blurred) wallpaper show through instead of a flat
+              # background color behind windows / in the gaps.
+              background-color = "transparent";
             };
 
+            # Keep noctalia's wallpaper pinned behind the workspace backdrop so
+            # it's visible through transparent/blurred surfaces on every workspace.
+            layer-rules = [
+              {
+                matches = [ { namespace = "^noctalia-background"; } ];
+                place-within-backdrop = true;
+              }
+            ];
+
+            # Stronger global blur (defaults: passes=3, offset=3.0). More passes/offset
+            # = smoother, heavier blur. Only unfocused windows stay translucent (see
+            # the is-focused rule below), so this is effectively the unfocused blur.
+            blur = {
+              passes = 5;
+              offset = 8.0;
+            };
+
+            # noctalia settings (see: https://docs.noctalia.dev/v4/getting-started/compositor-settings/niri/)
+            window-rules = [
+              {
+                geometry-corner-radius = 20;
+                clip-to-geometry = true;
+              }
+              # Brave: translucent + blurred behind it
+              {
+                matches = [ { app-id = "^brave-browser$"; } ];
+                opacity = blurOpacity;
+                background-effect = {
+                  blur = true;
+                  xray = true;
+                };
+              }
+              # Ghostty: translucent + blurred (ghostty's own background-blur is
+              # KDE/macOS-only, and its background-opacity is now 1.0 so this
+              # window-rule opacity is the only source of transparency — letting
+              # the is-focused rule below actually restore full opacity on focus).
+              {
+                matches = [ { app-id = "^com\\.mitchellh\\.ghostty$"; } ];
+                opacity = blurOpacity;
+                background-effect = {
+                  blur = true;
+                  xray = true;
+                };
+              }
+              # Obsidian: translucent + blurred (electron reports itself opaque,
+              # so force opacity != 1 or niri's blur never kicks in).
+              {
+                matches = [ { app-id = "^md\\.obsidian\\.Obsidian$"; } ];
+                opacity = blurOpacity;
+                background-effect = {
+                  blur = true;
+                  xray = true;
+                };
+              }
+              # Hermes desktop: translucent + blurred (electron/tauri reports itself
+              # opaque, so force opacity != 1 or niri's blur never kicks in).
+              {
+                matches = [ { app-id = "^hermes$"; } ];
+                opacity = blurOpacity;
+                background-effect = {
+                  blur = true;
+                  xray = true;
+                };
+              }
+              # Nautilus: translucent + blurred (GTK4/libadwaita paints an opaque
+              # background, so force opacity != 1 or niri's blur never kicks in).
+              {
+                matches = [ { app-id = "^org\\.gnome\\.Nautilus$"; } ];
+                opacity = 0.9;
+                background-effect = {
+                  blur = true;
+                  xray = true;
+                };
+              }
+              # Focused window: fully opaque, overriding the per-app rules above
+              # (window-rules are applied in order, later rules win on conflict).
+              {
+                matches = [ { is-focused = true; } ];
+                opacity = 1.0;
+              }
+            ];
+
             debug.honor-xdg-activation-with-invalid-serial = _: { };
+
+            # noctalia ignores logind lock signals; lock on lid close ourselves.
+            switch-events.lid-close.spawn = [
+              noctalia_exe
+              "ipc"
+              "call"
+              "lockScreen"
+              "lock"
+            ];
 
             binds = {
               # Dedicated Launchers
@@ -181,7 +277,7 @@
         {
           lazy = false;
           content = ''
-            alias deamonize="nix run ./nixt#niri -- msg action spawn-sh --"
+            alias deamonize="${lib.getExe self'.packages.niri} msg action spawn-sh --"
           '';
         }
       ];
