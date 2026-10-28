@@ -2,16 +2,56 @@
   flake.nixosModules.wallpapers =
     {
       pkgs,
+      lib,
       ...
     }:
     let
       sys = pkgs.stdenv.hostPlatform.system;
+      change-wallpaper = self.packages.${sys}.change-wallpaper;
+      noctalia-shell = self.packages.${sys}.noctalia-shell;
     in
     {
       environment.systemPackages = [
         self.packages.${sys}.wallpapers
-        self.packages.${sys}.change-wallpaper
+        change-wallpaper
       ];
+
+      # Supervised daemon. It used to be a niri spawn-at-startup entry, which
+      # nothing restarts: one crash (or one log.Fatal on a network blip) froze
+      # the wallpaper until the next login.
+      systemd.user.services.wallpaper-daemon = {
+        description = "Pick and apply wallpapers, and serve the control socket";
+        # graphical-session.target is reached by the compositor, which must be
+        # up before `noctalia-shell ipc call` can apply anything.
+        after = [ "graphical-session.target" ];
+        partOf = [ "graphical-session.target" ];
+        wantedBy = [ "graphical-session.target" ];
+
+        # noctalia-shell must be on PATH: change-wallpaper --apply=noctalia
+        # shells out to it by name.
+        path = [ noctalia-shell ];
+
+        serviceConfig = {
+          Type = "simple";
+          # Persistent output path: without --output the picked image lands in
+          # $TMPDIR, which is wiped between boots, so noctalia ends up pointing
+          # at a deleted file and shows no wallpaper after a restart.
+          StateDirectory = "wallpaper";
+          # %h = home, %t = XDG_RUNTIME_DIR, %S = state dir root.
+          ExecStart = lib.concatStringsSep " " [
+            (lib.getExe change-wallpaper)
+            "--filter-file=%h/.config/wallpaper-filter.txt"
+            "--output=%S/wallpaper/current.png"
+            "--apply=noctalia"
+            # Control socket the noctalia wallpaper-changer plugin talks to
+            # (trigger a change, list collections, set the filter).
+            "--socket=%t/change-wallpaper.sock"
+            "--daemon"
+          ];
+          Restart = "always";
+          RestartSec = 5;
+        };
+      };
     };
 
   perSystem =
