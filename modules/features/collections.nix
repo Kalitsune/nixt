@@ -22,6 +22,7 @@
   flake.nixosModules.essentials = { pkgs, ... }: {
     imports = [
       self.nixosModules.tailscale
+      self.nixosModules.netbird
       self.nixosModules.flatpak
     ];
 
