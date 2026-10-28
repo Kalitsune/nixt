@@ -23,7 +23,7 @@ bindkey '^[[B' history-search-forward  # down
 
 # $PATH configuration
 # note: language-specific paths are located in .config/zsh/tools
-# path+=("$HOME/.local/bin")
+path+=("$HOME/.local/bin")
 
 # misc zsh features
 autoload -Uz add-zsh-hook

@@ -83,6 +83,7 @@
           };
 
           zshrc.content = ''
+            export PATH="$HOME/.npm-global/bin:$PATH"
             source ${pkgs.zsh-defer}/share/zsh-defer/zsh-defer.plugin.zsh
           ''
           + lib.concatStringsSep "\n" (
