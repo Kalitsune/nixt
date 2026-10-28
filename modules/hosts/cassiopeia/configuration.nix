@@ -19,6 +19,25 @@
       # TMP
       services.teamviewer.enable = true;
 
+      # Lid close locks the session even when caffeine/keep-awake inhibits sleep.
+      services.logind.settings.Login = {
+        HandleLidSwitch = "lock";
+        HandleLidSwitchExternalPower = "lock";
+        HandleLidSwitchDocked = "lock";
+        LidSwitchIgnoreInhibited = "no";
+      };
+
+      # Root cause of the ghost wifi: iwlwifi/firmware keeps the old association
+      # across s2idle, so NM shows the previous AP as connected until forced off.
+      # Drop the driver before sleep, load it after => interface comes back virgin.
+      boot.extraModprobeConfig = "options iwlmvm power_scheme=1";
+      powerManagement.powerDownCommands = ''
+        ${pkgs.kmod}/bin/modprobe -r iwlmvm iwlwifi || true
+      '';
+      powerManagement.resumeCommands = ''
+        ${pkgs.kmod}/bin/modprobe iwlwifi
+      '';
+
       # Bootloader.
       boot.loader.systemd-boot.enable = true;
       boot.loader.systemd-boot.configurationLimit = 5;
@@ -117,6 +136,7 @@
           "networkmanager"
           "wheel"
           "video"
+          "dialout"
         ];
         packages = with pkgs; [
           google-cloud-sdk
