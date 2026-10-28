@@ -27,7 +27,15 @@
 
           settings = {
             # Aesthetics
-            theme = "Rose Pine";
+            # Colors are pushed live by noctalia-shell's ghostty template (see
+            # noctalia-shell.json activeTemplates) — it flips this to the
+            # noctalia palette and rewrites it on every wallpaper/mode change.
+            theme = "noctalia";
+            # Opaque here: transparency is handled by niri's window-rule opacity
+            # instead (see niri.nix), so the is-focused rule can actually make it
+            # fully opaque — ghostty's own alpha would otherwise multiply on top
+            # and stay translucent even when niri sets surface opacity to 1.0.
+            background-opacity = 1.0;
             window-decoration = false;
             gtk-single-instance = false;
             # gtk-tabs-location = "hidden";
