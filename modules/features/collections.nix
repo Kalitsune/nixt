@@ -31,6 +31,7 @@
       self.packages.${pkgs.stdenv.hostPlatform.system}.terminal
       self.packages.${pkgs.stdenv.hostPlatform.system}.browser
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor
+      self.packages.${pkgs.stdenv.hostPlatform.system}.helix
       self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
       pkgs.beeper
       pkgs.element-desktop
