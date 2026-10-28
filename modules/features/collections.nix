@@ -34,13 +34,13 @@
       self.packages.${pkgs.stdenv.hostPlatform.system}.helix
       self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
       pkgs.beeper
-      pkgs.element-desktop
-      pkgs.fluffychat
+      pkgs.cinny-desktop
       pkgs.filezilla
       pkgs.localsend
 
       # Utils
       pkgs.mission-center
+      pkgs.dnsutils
     ];
   };
 
@@ -48,6 +48,8 @@
     environment.systemPackages = [
       pkgs.valent
       pkgs.figma-linux
+      pkgs.inkscape
+      pkgs.kicad
     ];
   };
 
@@ -55,7 +57,7 @@
     environment.systemPackages = [
       pkgs.anki
       pkgs.obsidian
-      pkgs.zotero
+      # pkgs.zotero
     ];
   };
 
