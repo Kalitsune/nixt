@@ -14,7 +14,7 @@
       "contentPadding": 2,
       "fontScale": 1,
       "enableExclusionZoneInset": true,
-      "backgroundOpacity": 1,
+      "backgroundOpacity": 0.93,
       "useSeparateOpacity": false,
       "marginVertical": 4,
       "marginHorizontal": 4,
@@ -79,39 +79,6 @@
             "hideWhenIdle": true,
             "id": "AudioVisualizer",
             "width": 100
-          },
-          {
-            "defaultSettings": {
-              "barCycleIntervalSec": 5,
-              "barDisplayMode": "active",
-              "barMetric": "prompts",
-              "providers": {
-                "claude": {
-                  "credentialsPath": "~/.claude/.credentials.json",
-                  "enabled": false,
-                  "statsPath": "~/.claude/stats-cache.json"
-                },
-                "codex": {
-                  "enabled": false
-                },
-                "copilot": {
-                  "enabled": false
-                },
-                "gemini": {
-                  "enabled": false
-                },
-                "openrouter": {
-                  "apiKey": "",
-                  "enabled": false
-                },
-                "zen": {
-                  "apiKey": "",
-                  "enabled": false
-                }
-              },
-              "refreshIntervalSec": 30
-            },
-            "id": "plugin:model-usage"
           }
         ],
         "center": [
@@ -156,30 +123,6 @@
             "unreadBadgeColor": "primary"
           },
           {
-            "iconColor": "none",
-            "id": "WallpaperSelector"
-          },
-          {
-            "defaultSettings": {
-              "compactMode": false,
-              "defaultPeerAction": "copy-ip",
-              "hideDisconnected": false,
-              "hideMullvadExitNodes": true,
-              "loginServer": "",
-              "pingCount": 5,
-              "refreshInterval": 5000,
-              "showIpAddress": true,
-              "showPeerCount": true,
-              "showSearchBar": false,
-              "sshUsername": "",
-              "taildropDownloadDir": "~/Downloads",
-              "taildropEnabled": true,
-              "taildropReceiveMode": "operator",
-              "terminalCommand": ""
-            },
-            "id": "plugin:tailscale"
-          },
-          {
             "defaultSettings": {
               "activeColor": "primary",
               "camFilterRegex": "",
@@ -191,6 +134,12 @@
               "removeMargins": false
             },
             "id": "plugin:privacy-indicator"
+          },
+          {
+            "id": "plugin:netbird"
+          },
+          {
+            "id": "plugin:wallpaper-changer"
           },
           {
             "deviceNativePath": "__default__",
@@ -225,7 +174,7 @@
       "screenOverrides": []
     },
     "general": {
-      "avatarImage": "/home/kalitsune/.face",
+      "avatarImage": "~/.face",
       "dimmerOpacity": 0.2,
       "showScreenCorners": false,
       "forceBlackScreenCorners": false,
@@ -242,7 +191,7 @@
       "showSessionButtonsOnLockScreen": true,
       "showHibernateOnLockScreen": false,
       "enableLockScreenMediaControls": true,
-      "enableShadows": false,
+      "enableShadows": true,
       "enableBlurBehind": true,
       "shadowDirection": "bottom_right",
       "shadowOffsetX": 2,
@@ -255,11 +204,11 @@
       "lockScreenCountdownDuration": 10000,
       "autoStartAuth": true,
       "allowPasswordWithFprintd": true,
-      "clockStyle": "analog",
+      "clockStyle": "custom",
       "clockFormat": "hh\\nmm",
       "passwordChars": true,
       "lockScreenMonitors": [],
-      "lockScreenBlur": 0.3,
+      "lockScreenBlur": 0.1,
       "lockScreenTint": 0,
       "keybinds": {
         "keyUp": [
@@ -294,10 +243,10 @@
       "fontDefaultScale": 1.1,
       "fontFixedScale": 1.1099999999999999,
       "tooltipsEnabled": true,
-      "scrollbarAlwaysVisible": false,
+      "scrollbarAlwaysVisible": true,
       "boxBorderEnabled": false,
-      "panelBackgroundOpacity": 0.75,
-      "translucentWidgets": true,
+      "panelBackgroundOpacity": 0.93,
+      "translucentWidgets": false,
       "panelsAttachedToBar": true,
       "settingsPanelMode": "attached",
       "settingsPanelSideBarCardStyle": false
@@ -336,8 +285,8 @@
     },
     "wallpaper": {
       "enabled": true,
-      "overviewEnabled": true,
-      "directory": "/home/kalitsune/.config/wallpaper",
+      "overviewEnabled": false,
+      "directory": "~/Pictures/Wallpapers",
       "monitorDirectories": [],
       "enableMultiMonitorDirectories": false,
       "showHiddenFiles": false,
@@ -350,7 +299,7 @@
       "solidColor": "#1a1a2e",
       "automationEnabled": false,
       "wallpaperChangeMode": "random",
-      "randomIntervalSec": 1800,
+      "randomIntervalSec": 300,
       "transitionDuration": 1500,
       "transitionType": [
         "fade",
@@ -651,7 +600,7 @@
       "volumeStep": 5,
       "volumeOverdrive": false,
       "spectrumFrameRate": 30,
-      "visualizerType": "mirrored",
+      "visualizerType": "linear",
       "spectrumMirrored": true,
       "mprisBlacklist": [],
       "preferredPlayer": "",
@@ -668,7 +617,7 @@
       "useWallpaperColors": true,
       "predefinedScheme": "Noctalia (default)",
       "darkMode": true,
-      "schedulingMode": "location",
+      "schedulingMode": "off",
       "manualSunrise": "06:30",
       "manualSunset": "18:30",
       "generationMethod": "tonal-spot",
@@ -676,8 +625,21 @@
       "syncGsettings": true
     },
     "templates": {
-      "activeTemplates": [],
-      "enableUserTheming": false
+      "activeTemplates": [
+        {
+          "enabled": true,
+          "id": "ghostty"
+        },
+        {
+          "enabled": true,
+          "id": "gtk"
+        },
+        {
+          "enabled": true,
+          "id": "niri"
+        }
+      ],
+      "enableUserTheming": true
     },
     "nightLight": {
       "enabled": false,
@@ -719,7 +681,7 @@
       "customCommands": "[]"
     },
     "desktopWidgets": {
-      "enabled": false,
+      "enabled": true,
       "overviewEnabled": true,
       "gridSnap": false,
       "gridSnapScale": false,
@@ -728,17 +690,41 @@
           "name": "eDP-1",
           "widgets": [
             {
-              "hideMode": "hidden",
+              "hideMode": "visible",
               "id": "MediaPlayer",
               "roundedCorners": true,
               "scale": 1,
               "showAlbumArt": true,
               "showBackground": true,
               "showButtons": true,
-              "showVisualizer": false,
+              "showVisualizer": true,
               "visualizerType": "linear",
               "x": 12,
               "y": 934
+            },
+            {
+              "colorName": "primary",
+              "height": 72,
+              "hideWhenIdle": false,
+              "id": "AudioVisualizer",
+              "roundedCorners": true,
+              "scale": 1.1867756271243528,
+              "showBackground": true,
+              "visualizerType": "linear",
+              "width": 900,
+              "x": 570,
+              "y": 932
+            },
+            {
+              "diskPath": "/",
+              "id": "SystemStat",
+              "layout": "bottom",
+              "roundedCorners": true,
+              "scale": 1,
+              "showBackground": true,
+              "statType": "CPU",
+              "x": 13,
+              "y": 56
             }
           ]
         }
@@ -747,12 +733,12 @@
   },
   "state": {
     "doNotDisturb": false,
-    "noctaliaPerformanceMode": true,
+    "noctaliaPerformanceMode": false,
     "barVisible": true,
     "openedPanel": "",
     "lockScreenActive": false,
     "wallpapers": {
-      "eDP-1": "/nix/store/f475a426f2g78gk0imnbx46fsclp8ajj-wallpapers-unstable-2026-07-09/share/wallpapers/vibrant-nature/melanie-magdalena-KpBAYMNf9Tw-unsplash.jpg"
+      "eDP-1": "~/.local/state/wallpaper/current.png"
     },
     "desktopWidgetsEditMode": false,
     "display": {
@@ -773,7 +759,7 @@
       }
     },
     "notificationsState": {
-      "lastSeenTs": 1785243808000
+      "lastSeenTs": 1791813904000
     },
     "changelogState": {
       "lastSeenVersion": "v4.7.7"

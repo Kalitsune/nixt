@@ -1,0 +1,36 @@
+{
+  "panel": {
+    "title": "Fond d'écran",
+    "collections": "Collections",
+    "any-collection": "Toutes les collections",
+    "no-wallpaper": "Aucun fond d'écran défini",
+    "loading": "Chargement des collections…",
+    "no-collections": "Aucune collection trouvée.",
+    "daemon-down": "Démon arrêté",
+    "daemon-down-hint": "Démarre le démon de fond d'écran pour choisir une collection."
+  },
+  "actions": {
+    "change-now": "Changer le fond d'écran",
+    "reload": "Recharger les collections",
+    "plugin-settings": "Paramètres du plugin"
+  },
+  "tooltip": {
+    "idle": "Fond d'écran",
+    "changing": "Changement en cours…",
+    "daemon-down": "Le démon de fond d'écran n'est pas lancé"
+  },
+  "toast": {
+    "changed": "Fond d'écran changé",
+    "failed": "Échec du changement de fond d'écran"
+  },
+  "settings": {
+    "title": "Wallpaper Changer",
+    "description": "Pilote le démon change-wallpaper via sa socket Unix. Le démon est lancé par le compositeur ; ces chemins ne sont à modifier que s'il a été lancé autrement.",
+    "exe": "Binaire change-wallpaper",
+    "exe-description": "Nom dans $PATH, ou chemin absolu.",
+    "socket": "Chemin de la socket",
+    "socket-description": "Vide utilise $WALLPAPER_SOCKET ou $XDG_RUNTIME_DIR/change-wallpaper.sock.",
+    "notify": "Notifier au changement",
+    "notify-description": "Affiche une notification avec le nom du nouveau fond d'écran."
+  }
+}

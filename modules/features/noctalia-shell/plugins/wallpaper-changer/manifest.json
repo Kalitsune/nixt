@@ -1,0 +1,26 @@
+{
+  "id": "wallpaper-changer",
+  "name": "Wallpaper Changer",
+  "version": "2.0.0",
+  "minNoctaliaVersion": "4.0.0",
+  "author": "kalitsune",
+  "license": "MIT",
+  "description": "Bar widget and panel for the change-wallpaper daemon: change the wallpaper now, see the current one, and pick which collection to draw from.",
+  "tags": ["Bar", "Panel", "Wallpaper"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "exe": "change-wallpaper",
+      "socketPath": "",
+      "notifyOnChange": true
+    }
+  }
+}

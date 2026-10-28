@@ -1,0 +1,36 @@
+name: noctalia
+description: Matches the live Noctalia-shell theme
+
+colors:
+  background: "{{colors.surface.default.hex}}"
+
+  ui_accent: "{{colors.primary.default.hex}}"
+  banner_accent: "{{colors.primary.default.hex}}"
+
+  banner_title: "{{colors.on_surface.default.hex}}"
+  banner_text: "{{colors.on_surface.default.hex}}"
+  ui_text: "{{colors.on_surface.default.hex}}"
+  banner_dim: "{{colors.on_surface_variant.default.hex}}"
+  banner_border: "{{colors.outline.default.hex}}"
+  ui_border: "{{colors.outline.default.hex}}"
+
+  ui_ok: "#4c9a5a"
+  ui_warn: "#c9a227"
+  ui_error: "{{colors.error.default.hex}}"
+
+  prompt: "{{colors.on_surface.default.hex}}"
+  input_rule: "{{colors.primary.default.hex}}"
+  response_border: "{{colors.tertiary.default.hex}}"
+  status_bar_bg: "{{colors.surface_container_low.default.hex}}"
+  status_bar_text: "{{colors.on_surface.default.hex}}"
+  status_bar_good: "#4c9a5a"
+  status_bar_warn: "#c9a227"
+  status_bar_critical: "{{colors.error.default.hex}}"
+  session_label: "{{colors.primary.default.hex}}"
+  session_border: "{{colors.outline.default.hex}}"
+
+branding:
+  agent_name: Hermes Agent
+  prompt_symbol: "❯"
+
+tool_prefix: "┊"

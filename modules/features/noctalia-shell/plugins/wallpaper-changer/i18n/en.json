@@ -1,0 +1,36 @@
+{
+  "panel": {
+    "title": "Wallpaper",
+    "collections": "Collections",
+    "any-collection": "Any collection",
+    "no-wallpaper": "No wallpaper set yet",
+    "loading": "Loading collections…",
+    "no-collections": "No collections found.",
+    "daemon-down": "Daemon not running",
+    "daemon-down-hint": "Start the wallpaper daemon to pick a collection."
+  },
+  "actions": {
+    "change-now": "Change wallpaper now",
+    "reload": "Reload collections",
+    "plugin-settings": "Plugin settings"
+  },
+  "tooltip": {
+    "idle": "Wallpaper",
+    "changing": "Changing wallpaper…",
+    "daemon-down": "Wallpaper daemon is not running"
+  },
+  "toast": {
+    "changed": "Wallpaper changed",
+    "failed": "Wallpaper change failed"
+  },
+  "settings": {
+    "title": "Wallpaper Changer",
+    "description": "Controls the change-wallpaper daemon over its Unix socket. The daemon is started by the compositor; these paths only need changing if it was started differently.",
+    "exe": "change-wallpaper binary",
+    "exe-description": "Name on $PATH, or an absolute path.",
+    "socket": "Socket path",
+    "socket-description": "Empty uses $WALLPAPER_SOCKET or $XDG_RUNTIME_DIR/change-wallpaper.sock.",
+    "notify": "Notify on change",
+    "notify-description": "Show a toast with the new wallpaper's name."
+  }
+}
