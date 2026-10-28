@@ -45,11 +45,17 @@
 
         specs = {
           # ── Theme ──────────────────────────────────────────────────────────────
-          nightfox = {
-            data = pkgs.vimPlugins.nightfox-nvim;
-            config = ''vim.cmd.colorscheme("carbonfox")'';
+          rosepine = {
+            data = pkgs.vimPlugins.rose-pine;
+            config = ''
+              require('rose-pine').setup({
+                -- Follows &background; :set background=light for Rose Pine Dawn.
+                variant = "auto",
+                dark_variant = "main",
+              })
+              vim.cmd.colorscheme("rose-pine")
+            '';
           };
-          # rosepine = pkgs.vimPlugins.rose-pine;
 
           # ── Mini ecosystem ─────────────────────────────────────────────────────
           # Replaces: nvchad statusline, vim-surround, nvim-autopairs,
