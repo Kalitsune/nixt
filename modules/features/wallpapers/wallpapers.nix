@@ -3,12 +3,17 @@
     {
       pkgs,
       lib,
+      config,
       ...
     }:
     let
       sys = pkgs.stdenv.hostPlatform.system;
       change-wallpaper = self.packages.${sys}.change-wallpaper;
-      noctalia-shell = self.packages.${sys}.noctalia-shell;
+      noctalia = self.packages.${sys}.noctalia;
+      hasNoctalia = self.lib.isLoaded config [
+        "noctalia"
+        "noctalia-shell"
+      ];
     in
     {
       environment.systemPackages = [
@@ -27,9 +32,9 @@
         partOf = [ "graphical-session.target" ];
         wantedBy = [ "graphical-session.target" ];
 
-        # noctalia-shell must be on PATH: change-wallpaper --apply=noctalia
+        # noctalia must be on PATH when in use: change-wallpaper --apply=noctalia
         # shells out to it by name.
-        path = [ noctalia-shell ];
+        path = lib.optional hasNoctalia noctalia;
 
         serviceConfig = {
           Type = "simple";
@@ -38,16 +43,20 @@
           # at a deleted file and shows no wallpaper after a restart.
           StateDirectory = "wallpaper";
           # %h = home, %t = XDG_RUNTIME_DIR, %S = state dir root.
-          ExecStart = lib.concatStringsSep " " [
-            (lib.getExe change-wallpaper)
-            "--filter-file=%h/.config/wallpaper-filter.txt"
-            "--output=%S/wallpaper/current.png"
-            "--apply=noctalia"
-            # Control socket the noctalia wallpaper-changer plugin talks to
-            # (trigger a change, list collections, set the filter).
-            "--socket=%t/change-wallpaper.sock"
-            "--daemon"
-          ];
+          ExecStart = lib.concatStringsSep " " (
+            [
+              (lib.getExe change-wallpaper)
+              "--filter-file=%h/.config/wallpaper-filter.txt"
+              "--output=%S/wallpaper/current.png"
+            ]
+            ++ lib.optional hasNoctalia "--apply=noctalia"
+            ++ [
+              # Control socket the noctalia wallpaper-changer plugin talks to
+              # (trigger a change, list collections, set the filter).
+              "--socket=%t/change-wallpaper.sock"
+              "--daemon"
+            ]
+          );
           Restart = "always";
           RestartSec = 5;
         };

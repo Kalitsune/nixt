@@ -258,6 +258,9 @@ func downloadGithubImage(gh githubSource, filePath string) (string, error) {
 func applyWallpaper(de, filePath string) error {
 	switch de {
 	case "auto":
+		if _, err := exec.LookPath("noctalia"); err == nil {
+			return runNoctalia(filePath)
+		}
 		if _, err := exec.LookPath("noctalia-shell"); err == nil {
 			return runNoctalia(filePath)
 		}
@@ -270,7 +273,7 @@ func applyWallpaper(de, filePath string) error {
 }
 
 func runNoctalia(filePath string) error {
-	cmd := exec.Command("noctalia-shell", "ipc", "call", "wallpaper", "set", filePath)
+	cmd := exec.Command("noctalia", "msg", "wallpaper-set", filePath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -340,10 +343,10 @@ func changeWallpaper(isGithub bool, gh githubSource, localPath, filter, output, 
 
 	if apply != "" {
 		if err := applyWallpaper(apply, finalPath); err != nil {
+			if isTmp {
+				os.Remove(finalPath)
+			}
 			return "", fmt.Errorf("apply wallpaper: %w", err)
-		}
-		if isTmp {
-			os.Remove(finalPath)
 		}
 		if output != "" {
 			// Only prune after a successful apply: the file in use must stay.

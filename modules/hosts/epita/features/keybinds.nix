@@ -16,23 +16,30 @@
 {
   terminal = {
     package = terminal;
-    key     = "Mod+Return";
-    unbind  = [ "Mod+T" ];
+    key = "Mod+Return";
+    unbind = [ "Mod+T" ];
   };
   launcher = {
     package = nixtPkgs.vicinae;
-    args    = [ "toggle" ];
-    key     = "Mod+D";
-    unbind  = [ "Mod+Space" ];
+    args = [ "toggle" ];
+    key = "Mod+D";
+    unbind = [ "Mod+Space" ];
   };
   sessionMenu = {
-    package = nixtPkgs.noctalia-shell;
-    args    = [ "ipc" "call" "sessionMenu" "toggle" ];
-    key     = "Mod+Shift+E";
-    unbind  = [ "Mod+M" ];
+    package = nixtPkgs.noctalia;
+    args = [
+      "msg"
+      "panel-toggle"
+      "session"
+    ];
+    key = "Mod+Shift+E";
+    unbind = [ "Mod+M" ];
   };
   closeWindow = {
-    key    = "Mod+Shift+Q";
-    unbind = [ "Mod+X" "Mod+Shift+X" ];
+    key = "Mod+Shift+Q";
+    unbind = [
+      "Mod+X"
+      "Mod+Shift+X"
+    ];
   };
 }

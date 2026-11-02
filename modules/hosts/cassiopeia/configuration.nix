@@ -126,6 +126,7 @@
       # services.xserver.libinput.enable = true;
 
       # Define default shell
+      environment.shells = [ self.packages.${pkgs.stdenv.hostPlatform.system}.shell ];
       users.defaultUserShell = self.packages.${pkgs.stdenv.hostPlatform.system}.shell;
 
       # Define a user account. Don't forget to set a password with ‘passwd’.

@@ -5,7 +5,7 @@
 }:
 {
   # Obsidian vault themed by Noctalia (unset = no Obsidian theming).
-  perSystem.obsidian.vaultRoot = "~/Documents/PKMS/Fanny";
+  perSystem.obsidian.vault_path = "~/Documents/PKMS/Fanny";
 
   flake.nixosConfigurations.Cassiopeia = inputs.nixpkgs.lib.nixosSystem {
     modules = [

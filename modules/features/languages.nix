@@ -26,6 +26,16 @@
       pkgs.rust-analyzer
     ];
   };
+  perSystem = { ... }: {
+    zsh.rc = [
+      {
+        lazy = false;
+        content = ''
+          PATH+=":$HOME/.cargo/bin"
+        '';
+      }
+    ];
+  };
 
   flake.nixosModules.c = { pkgs, ... }: {
     environment.systemPackages = [

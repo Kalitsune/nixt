@@ -19,9 +19,9 @@
 
       # Essential Apps
       packages.browser = pkgs.brave;
-      packages.editor = self'.packages.neovim;
+      packages.editor = self'.packages.helix;
       packages.file-explorer =
-        if pkgs.stdenv.isDarwin then
+        if pkgs.stdenv.hostPlatform.isDarwin then
           pkgs.writeShellScriptBin "finder" ''
             if [ $# -gt 0 ]; then
               exec open -a Finder "$@"
