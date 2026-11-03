@@ -5,13 +5,63 @@ let
   pie = builtins.getFlake "github:epita/nixpie";
   nixtPkgs = nixt.packages.${system};
   terminal = pie.inputs.nixpkgs.legacyPackages.${system}.rxvt-unicode;
-  keybinds = import ./features/keybinds.nix { inherit nixtPkgs terminal; };
+
+  # EPITA machines are a single 1920x1080 DP-1 screen: only the lockscreen widget
+  # placement differs from the base nixt noctalia (widgets themselves live in
+  # modules/features/noctalia/noctalia.nix).
+  noctalia = nixtPkgs.noctalia.wrap {
+    settings.lockscreen_widgets = {
+      widget_order = [
+        "clock_analog"
+        "clock_digital"
+        "login"
+      ];
+      grid = {
+        cell_size = 16;
+        major_interval = 4;
+        visible = true;
+      };
+      widget = {
+        clock_analog = {
+          output = "DP-1";
+          placement_width = 1920.0;
+          placement_height = 1080.0;
+          cx = 655.0;
+          cy = 620.0;
+          rotation = 0.0;
+        };
+        clock_digital = {
+          output = "DP-1";
+          placement_width = 1920.0;
+          placement_height = 1080.0;
+          cx = 1071.5;
+          cy = 620.0;
+          rotation = 0.0;
+        };
+        login = {
+          output = "DP-1";
+          placement_width = 1920.0;
+          placement_height = 1080.0;
+          box_width = 810.0;
+          box_height = 196.0;
+          cx = 960.0;
+          cy = 898.0;
+          rotation = 0.0;
+        };
+      };
+    };
+  };
+
+  keybinds = import ./features/keybinds.nix {
+    nixtPkgs = nixtPkgs // { inherit noctalia; };
+    inherit terminal;
+  };
 
   # Build a shell-command string from a keybind action attrset.
   cmd = kb: builtins.concatStringsSep " " ([ (pkgs.lib.getExe kb.package) ] ++ (kb.args or [ ]));
 
   basePackages = nixtPkgs // {
-    inherit terminal;
+    inherit terminal noctalia;
   };
 in
 {
@@ -20,6 +70,7 @@ in
     nixt
     pie
     terminal
+    noctalia
     keybinds
     ;
 
@@ -42,16 +93,21 @@ in
             k: _: !(epitaBinds ? ${k}) && !(builtins.elem k extraUnbinds)
           ) nixtPkgs.niri.configuration.settings.binds)
           // epitaBinds;
-        noctalia_bin = "${nixtPkgs.noctalia}/bin";
+        noctalia_bin = "${noctalia}/bin";
         changeWp = pkgs.lib.getExe nixtPkgs.change-wallpaper;
-        # Strip any wallpaper-daemon inherited from an older base niri package.
+        # Strip the wallpaper-daemon inherited from an older base niri package, and
+        # the base noctalia so the DP-1-positioned wrapper above is spawned instead.
         filteredSpawnAt = pkgs.lib.filter (
-          x: !(builtins.isString x && pkgs.lib.hasSuffix "wallpaper-daemon" x)
+          x:
+          !(
+            builtins.isString x
+            && (pkgs.lib.hasSuffix "wallpaper-daemon" x || pkgs.lib.hasInfix "/bin/noctalia" x)
+          )
         ) nixtPkgs.niri.configuration.settings.spawn-at-startup;
       in
       nixtPkgs.niri.wrap {
         settings = {
-          spawn-at-startup = pkgs.lib.mkForce filteredSpawnAt;
+          spawn-at-startup = pkgs.lib.mkForce (filteredSpawnAt ++ [ (pkgs.lib.getExe noctalia) ]);
           spawn-sh-at-startup = [
             "${pkgs.xorg.xrdb}/bin/xrdb -merge \"$HOME/.Xresources\" 2>/dev/null || true"
             # Wait 3 s for noctalia to finish init before the first IPC wallpaper call.

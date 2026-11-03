@@ -91,11 +91,14 @@
               ];
 
               # Stronger global blur (defaults: passes=3, offset=3.0). More passes/offset
-              # = smoother, heavier blur. Only unfocused windows stay translucent (see
-              # the is-focused rule below), so this is effectively the unfocused blur.
+              # = smoother, heavier blur.
               blur = {
                 passes = 5;
                 offset = 8.0;
+              };
+
+              overview = {
+                zoom = 0.5;
               };
 
               # noctalia settings (see: https://docs.noctalia.dev/v4/getting-started/compositor-settings/niri/)
@@ -103,43 +106,8 @@
                 {
                   geometry-corner-radius = 20;
                   clip-to-geometry = true;
-                }
-                # Brave: translucent + blurred behind it
-                {
-                  matches = [ { app-id = "^brave-browser$"; } ];
-                  opacity = blurOpacity;
-                  background-effect = {
-                    blur = true;
-                    xray = true;
-                  };
-                }
-                # Ghostty: translucent + blurred (ghostty's own background-blur is
-                # KDE/macOS-only, and its background-opacity is now 1.0 so this
-                # window-rule opacity is the only source of transparency — letting
-                # the is-focused rule below actually restore full opacity on focus).
-                {
-                  matches = [ { app-id = "^com\\.mitchellh\\.ghostty$"; } ];
-                  opacity = blurOpacity;
-                  background-effect = {
-                    blur = true;
-                    xray = true;
-                  };
-                }
-                # Obsidian: translucent + blurred (electron reports itself opaque,
-                # so force opacity != 1 or niri's blur never kicks in).
-                {
-                  matches = [ { app-id = "^md\\.obsidian\\.Obsidian$"; } ];
-                  opacity = blurOpacity;
-                  background-effect = {
-                    blur = true;
-                    xray = true;
-                  };
-                }
-                # Hermes desktop: translucent + blurred (electron/tauri reports itself
-                # opaque, so force opacity != 1 or niri's blur never kicks in).
-                {
-                  matches = [ { app-id = "^hermes$"; } ];
-                  opacity = blurOpacity;
+                  draw-border-with-background = false;
+                  opacity = 0.75;
                   background-effect = {
                     blur = true;
                     xray = true;
@@ -149,17 +117,14 @@
                 # background, so force opacity != 1 or niri's blur never kicks in).
                 {
                   matches = [ { app-id = "^org\\.gnome\\.Nautilus$"; } ];
-                  opacity = 0.9;
                   background-effect = {
                     blur = true;
                     xray = true;
                   };
                 }
-                # Focused window: fully opaque, overriding the per-app rules above
-                # (window-rules are applied in order, later rules win on conflict).
                 {
                   matches = [ { is-focused = true; } ];
-                  opacity = 1.0;
+                  opacity = 0.8;
                 }
               ];
 

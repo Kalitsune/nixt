@@ -40,6 +40,7 @@
 
             shell = {
               screen_corners.enabled = true;
+              screen_time_enabled = true;
               polkit_agent = true;
               password_style = "random";
 
@@ -63,6 +64,24 @@
               external_ip_enabled = true;
             };
 
+            idle.behavior = {
+              lock = {
+                enabled = true;
+                timeout = 600;
+                action = "lock";
+              };
+              screen-off = {
+                timeout = 660;
+                action = "screen_off"; # turns monitors off, and back on when you return
+                enabled = true;
+              };
+              suspend = {
+                enabled = true;
+                timeout = 900;
+                action = "lock_and_suspend"; # or action = "suspend" with lock_before_suspend = false
+              };
+            };
+
             lockscreen = {
               blurred_desktop = true; # shows actual desktop instead of wallpaper
             };
@@ -72,7 +91,7 @@
 
               widget = {
                 login = {
-                  type = "login-box";
+                  type = "login_box";
                   settings = {
                     show_caps_lock = true;
                     show_keyboard_layout = true;
@@ -109,6 +128,8 @@
               mode = "auto";
               source = "wallpaper";
               pure_black_dark = true;
+              wallpaper_scheme = "m3-rainbow"; # prevents monochrome contrasts leading to themes making text hard to read
+
               templates = {
                 enable_builtin_templates = true;
                 builtin_ids = [
@@ -157,6 +178,39 @@
               tint_intensity = 0.1;
             };
 
+            bar.default = {
+              margin_ends = 0;
+
+              capsule_group = [
+                {
+                  id = "control_center";
+                  fill = "surface_container";
+                  padding = 8;
+                  members = [
+                    "network"
+                    "bluetooth"
+                    "battery"
+                  ];
+                }
+              ];
+
+              start = [
+                "workspaces"
+                "spacer"
+                "media"
+              ];
+              center = [ "clock" ];
+              end = [
+                "tray"
+                "notifications"
+                "volume"
+                "brightness"
+                "spacer"
+                "group:control_center"
+              ];
+
+            };
+
             desktop_widgets.enabled = false;
             wallpaper = {
               enabled = true;
@@ -191,6 +245,12 @@
 
             notification = {
               history_retention_hours = 7 * 24; # one week
+            };
+
+            calendar = {
+              enabled = true;
+              dedupe_events = true;
+              refresh_minutes = 10;
             };
 
           };
