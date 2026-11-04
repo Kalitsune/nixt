@@ -19,11 +19,11 @@
       # TMP
       services.teamviewer.enable = true;
 
-      # Lid close locks the session even when caffeine/keep-awake inhibits sleep.
+      # Lid close suspends (niri still locks first); caffeine/keep-awake inhibits it.
       services.logind.settings.Login = {
-        HandleLidSwitch = "lock";
-        HandleLidSwitchExternalPower = "lock";
-        HandleLidSwitchDocked = "lock";
+        HandleLidSwitch = "suspend";
+        HandleLidSwitchExternalPower = "suspend";
+        HandleLidSwitchDocked = "suspend";
         LidSwitchIgnoreInhibited = "no";
       };
 

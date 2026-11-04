@@ -26,10 +26,11 @@ hi.setup({
 	},
 })
 
+local snippets_dir = vim.env.NVIM_SNIPPETS_DIR or (vim.fn.stdpath("config") .. "/snippets")
 require("mini.snippets").setup({
 	snippets = {
 		require("mini.snippets").gen_loader.from_lang(),
-		require("mini.snippets").gen_loader.from_file(vim.fn.stdpath("config") .. "/snippets/typst.json"),
-		require("mini.snippets").gen_loader.from_file(vim.fn.stdpath("config") .. "/snippets/package.json"),
+		require("mini.snippets").gen_loader.from_file(snippets_dir .. "/typst.json"),
+		require("mini.snippets").gen_loader.from_file(snippets_dir .. "/package.json"),
 	},
 })

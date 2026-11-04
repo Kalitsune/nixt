@@ -1,0 +1,37 @@
+{
+  "Header guard": {
+    "prefix": "guard",
+    "body": [
+      "#ifndef ${1:${TM_FILENAME_BASE/(.*)/${1:/upcase}/}}_H",
+      "#define ${1}_H",
+      "",
+      "$0",
+      "",
+      "#endif // ${1}_H"
+    ],
+    "description": "Header include guard from filename"
+  },
+  "Criterion test": {
+    "prefix": "crtest",
+    "body": [
+      "Test(${1:suite}, ${2:name})",
+      "{",
+      "    $0",
+      "}"
+    ],
+    "description": "Criterion Test()"
+  },
+  "Criterion test file": {
+    "prefix": "crfile",
+    "body": [
+      "#include <criterion/criterion.h>",
+      "#include <stddef.h>",
+      "",
+      "Test(${1:suite}, ${2:name})",
+      "{",
+      "    $0",
+      "}"
+    ],
+    "description": "Criterion test file skeleton"
+  }
+}

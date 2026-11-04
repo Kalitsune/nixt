@@ -1,0 +1,1 @@
+{"name":"kiss-kalitsune-s-snippets","contributes":{"snippets":[{"language":["typst"],"path":"./typst.json"},{"language":["markdown"],"path":"./markdown.json"},{"language":["c"],"path":"./c.json"},{"language":["cpp"],"path":"./cpp.json"}]}}

@@ -10,16 +10,14 @@
           nerd-fonts.jetbrains-mono
 
           # LSP servers
-          lua-language-server
           typescript-language-server
           vscode-langservers-extracted # html, css, json
-          tailwindcss-language-server
           svelte-language-server
           clang-tools # clangd
-          jdt-language-server
           tinymist # typst
-          bash-language-server
+          bash-language-server # sh
           nil # nix
+          simple-completion-language-server # snippets (scls)
 
           # Formatters
           stylua
@@ -48,6 +46,25 @@
               select = "underline";
             };
           };
+
+          keys = {
+            normal = {
+              space = {
+                x = ":buffer-close";
+                X = ":buffer-close!";
+              };
+            };
+          };
+        };
+
+        languages.language-server.scls = {
+          command = "simple-completion-language-server";
+          config = {
+            feature_snippets = true;
+            feature_words = false;
+            feature_paths = false;
+            snippets_first = true;
+          };
         };
 
         languages.language = [
@@ -55,17 +72,61 @@
             name = "nix";
             auto-format = true;
             formatter.command = "nixfmt";
+            language-servers = [
+              "nil"
+              "scls"
+            ];
           }
           {
             name = "typst";
             auto-format = true;
             formatter.command = "typstyle";
+            language-servers = [
+              "tinymist"
+              "scls"
+            ];
+          }
+          {
+            name = "c";
+            auto-format = true;
+            language-servers = [
+              "clangd"
+              "scls"
+            ];
+          }
+          {
+            name = "cpp";
+            auto-format = true;
+            language-servers = [
+              "clangd"
+              "scls"
+            ];
+          }
+          {
+            name = "markdown";
+            language-servers = [
+              "marksman"
+              "markdown-oxide"
+              "scls"
+            ];
           }
         ];
 
         # Allow Helix to inherit real XDG_CONFIG_HOME so it discovers
         # runtime themes from ~/.config/helix/themes/.
         env.XDG_CONFIG_HOME = pkgs.lib.mkForce null;
+
+        # Reuse neovim's VSCode-format snippets; filename = language id.
+        # package.json is the nvim manifest, not a snippet file.
+        env.SNIPPETS_PATH = "${pkgs.lib.fileset.toSource {
+          root = ./snippets;
+          fileset = pkgs.lib.fileset.unions [
+            ./snippets/c.json
+            ./snippets/cpp.json
+            ./snippets/typst.json
+            ./snippets/markdown.json
+          ];
+        }}";
         addFlag = [
           "-c"
           "${placeholder "out"}/hx-config/helix/config.toml"

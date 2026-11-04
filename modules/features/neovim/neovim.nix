@@ -11,6 +11,8 @@
 
         settings.config_directory = ./config;
 
+        env.NVIM_SNIPPETS_DIR = "${../snippets}";
+
         runtimePkgs = with pkgs; [
           # Fonts
           nerd-fonts.jetbrains-mono

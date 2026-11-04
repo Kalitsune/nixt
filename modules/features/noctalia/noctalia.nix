@@ -26,6 +26,9 @@
       }:
       let
         obsidian_vault = config.obsidian.vault_path;
+        control_center_actions = {
+          left = "panel-toggle control-center";
+        };
       in
       {
         packages.noctalia = (inputs.wrapper-modules.lib.evalModule self.wrappers.noctalia).config.wrap {
@@ -33,13 +36,28 @@
 
           runtimePkgs = [
             self'.packages.change-wallpaper
+            pkgs.grim # pixel-shift
+            pkgs.zenity # localsend-plus
+            pkgs.wl-clipboard # localsend-plus
+            pkgs.xdg-utils # localsend-plus
+            pkgs.dbus # eyecare (dbus-monitor)
+          ];
+
+          plugins = [
+            "mgeldi/pixel-shift"
+            "dotnetrob/cat"
+            "apex077/eyecare"
+            "0rgl/localsend-plus"
           ];
 
           settings = {
             location.auto_locate = true;
 
             shell = {
-              screen_corners.enabled = true;
+              screen_corners = {
+                enabled = true;
+                size = 45;
+              };
               screen_time_enabled = true;
               polkit_agent = true;
               password_style = "random";
@@ -178,14 +196,54 @@
               tint_intensity = 0.1;
             };
 
+            widget = {
+              privacy.hide_inactive = true;
+
+              ps_start.type = "mgeldi/pixel-shift:spacer";
+              ps_center_l.type = "mgeldi/pixel-shift:spacer";
+              ps_center_r.type = "mgeldi/pixel-shift:spacer";
+              ps_end.type = "mgeldi/pixel-shift:spacer";
+
+              cat.type = "dotnetrob/cat:cat";
+              eyecare.type = "apex077/eyecare:eyecare-widget";
+              localsend.type = "0rgl/localsend-plus:widget";
+
+              battery = {
+                display_mode = "graphic";
+                actions = control_center_actions // {
+                  right = "panel-toggle control-center power";
+                };
+              };
+              bluetooth = {
+                peek = true;
+                show_label = false;
+                actions = control_center_actions // {
+                  right = "panel-toggle control-center bluetooth";
+                };
+              };
+              network = {
+                peek = true;
+                show_label = false;
+                vpn_status = "both";
+                actions = control_center_actions // {
+                  right = "panel-toggle control-center network";
+                };
+              };
+            };
             bar.default = {
               margin_ends = 0;
+              radius = 100;
+              radius_top_left = 0;
+              radius_top_right = 0;
 
               capsule_group = [
                 {
                   id = "control_center";
-                  fill = "surface_container";
-                  padding = 8;
+                  foreground = "on_primary_container";
+                  fill = "primary_container";
+                  # padding = 8;
+                  opacity = 0.75;
+                  widget_spacing = 3;
                   members = [
                     "network"
                     "bluetooth"
@@ -195,18 +253,27 @@
               ];
 
               start = [
+                "ps_start"
                 "workspaces"
                 "spacer"
                 "media"
+                "spacer"
+                "cat"
               ];
-              center = [ "clock" ];
-              end = [
-                "tray"
+              center = [
+                "ps_center_l"
                 "notifications"
-                "volume"
-                "brightness"
+                "clock"
+                "ps_center_r"
+              ];
+              end = [
+                "eyecare"
+                "localsend"
+                "spacer"
+                "privacy"
                 "spacer"
                 "group:control_center"
+                "ps_end"
               ];
 
             };
@@ -251,6 +318,9 @@
               enabled = true;
               dedupe_events = true;
               refresh_minutes = 10;
+            };
+            plugin_settings = {
+              "0rgl/localsend-plus".panel_open_near_click = true;
             };
 
           };

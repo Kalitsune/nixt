@@ -46,6 +46,17 @@ let
         '';
       };
 
+      options.plugins = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        example = [ "dotnetrob/cat" ];
+        description = ''
+          Plugin ids ("<author>/<plugin>"). Enabled in config; any not yet
+          exported by Noctalia are fetched via `noctalia msg plugins enable`
+          in the background after startup.
+        '';
+      };
+
       options.extraConfig = lib.mkOption {
         type = lib.types.lines;
         default = "";
@@ -57,9 +68,14 @@ let
       config = {
         package = lib.mkDefault pkgs.noctalia;
 
-        settings = lib.mkIf (config.templates != { }) {
-          theme.templates.user = config.templates;
-        };
+        settings = lib.mkMerge [
+          (lib.mkIf (config.templates != { }) {
+            theme.templates.user = config.templates;
+          })
+          (lib.mkIf (config.plugins != [ ]) {
+            plugins.enabled = config.plugins;
+          })
+        ];
 
         constructFiles.generatedSettings = {
           content = builtins.toJSON config.settings;
@@ -89,6 +105,24 @@ let
             ln -sf "${config.constructFiles.generatedSettings.path}" \
               "$_noc_conf_dir/00-nix-settings.toml"
           ''
+          # ponytail: sequential, polls 2min per plugin; add retry if flaky
+          (lib.optionalString (config.plugins != [ ]) ''
+            (
+              _noc="${config.package}/bin/noctalia"
+              _mat="''${XDG_STATE_HOME:-$HOME/.local/state}/noctalia/plugins/materialized"
+              for _i in $(seq 60); do "$_noc" msg plugins list >/dev/null 2>&1 && break; sleep 2; done
+              for _id in ${lib.escapeShellArgs config.plugins}; do
+                set -- "$_mat"/*/"''${_id#*/}"
+                [ -e "$1" ] && continue
+                "$_noc" msg plugins enable "$_id" >/dev/null 2>&1
+                for _i in $(seq 60); do
+                  set -- "$_mat"/*/"''${_id#*/}"
+                  [ -e "$1" ] && break
+                  sleep 2
+                done
+              done
+            ) >/dev/null 2>&1 &
+          '')
         ];
       };
     };
