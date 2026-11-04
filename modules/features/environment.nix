@@ -1,10 +1,28 @@
 {
   self,
   inputs,
+  lib,
+  flake-parts-lib,
   ...
 }:
 {
-  perSystem =
+  options.perSystem = flake-parts-lib.mkPerSystemOption {
+    options.environment =
+      lib.genAttrs
+        [
+          "power-command"
+          "launcher-command"
+          "lid-close-command"
+          "screen-lock-command"
+        ]
+        (name: lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Shell command for ${name}; consumers (e.g. niri) skip the feature when null.";
+        });
+  };
+
+  config.perSystem =
     {
       pkgs,
       lib,

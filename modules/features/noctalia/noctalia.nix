@@ -29,8 +29,18 @@
         control_center_actions = {
           left = "panel-toggle control-center";
         };
+        noctalia_exe = lib.getExe self'.packages.noctalia;
+        lock = "${noctalia_exe} msg session lock";
       in
       {
+        environment = lib.mkIf (self.lib.isLoaded "noctalia") {
+          power-command = lib.mkDefault "${noctalia_exe} msg panel-toggle session";
+          launcher-command = lib.mkDefault "${noctalia_exe} msg panel-toggle launcher";
+          screen-lock-command = lib.mkDefault lock;
+          # noctalia ignores logind lock signals; lock on lid close ourselves.
+          lid-close-command = lib.mkDefault lock;
+        };
+
         packages.noctalia = (inputs.wrapper-modules.lib.evalModule self.wrappers.noctalia).config.wrap {
           inherit pkgs;
 
@@ -197,8 +207,6 @@
             };
 
             widget = {
-              privacy.hide_inactive = true;
-
               ps_start.type = "mgeldi/pixel-shift:spacer";
               ps_center_l.type = "mgeldi/pixel-shift:spacer";
               ps_center_r.type = "mgeldi/pixel-shift:spacer";
@@ -207,6 +215,9 @@
               cat.type = "dotnetrob/cat:cat";
               eyecare.type = "apex077/eyecare:eyecare-widget";
               localsend.type = "0rgl/localsend-plus:widget";
+
+              privacy.hide_inactive = true;
+              media.hide_when_no_media = true;
 
               battery = {
                 display_mode = "graphic";
@@ -257,7 +268,6 @@
                 "workspaces"
                 "spacer"
                 "media"
-                "spacer"
                 "cat"
               ];
               center = [
@@ -267,11 +277,9 @@
                 "ps_center_r"
               ];
               end = [
-                "eyecare"
                 "localsend"
                 "spacer"
                 "privacy"
-                "spacer"
                 "group:control_center"
                 "ps_end"
               ];

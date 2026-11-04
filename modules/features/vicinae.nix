@@ -1,8 +1,20 @@
-{ config, inputs, ... }:
+{
+  self,
+  config,
+  inputs,
+  ...
+}:
 {
   perSystem =
-    { pkgs, ... }:
     {
+      pkgs,
+      lib,
+      self',
+      ...
+    }:
+    {
+      environment.launcher-command = lib.mkIf (self.lib.isLoaded "vicinae") "${lib.getExe self'.packages.vicinae} toggle";
+
       packages.vicinae =
         (inputs.wrapper-modules.lib.evalModule config.flake.wrappers.vicinae).config.wrap
           {

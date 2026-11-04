@@ -107,7 +107,7 @@ let
           ''
           # ponytail: sequential, polls 2min per plugin; add retry if flaky
           (lib.optionalString (config.plugins != [ ]) ''
-            (
+            [ "$1" = msg ] || (
               _noc="${config.package}/bin/noctalia"
               _mat="''${XDG_STATE_HOME:-$HOME/.local/state}/noctalia/plugins/materialized"
               for _i in $(seq 60); do "$_noc" msg plugins list >/dev/null 2>&1 && break; sleep 2; done

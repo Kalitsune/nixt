@@ -44,6 +44,7 @@
               noctalia_exe = lib.getExe self'.packages.noctalia;
               wpctl_exe = lib.getExe' pkgs.wireplumber "wpctl";
               vicinae = lib.getExe self'.packages.vicinae;
+              env = config.environment;
             in
             {
               # The wallpaper daemon is NOT spawned here: spawn-at-startup is
@@ -130,21 +131,11 @@
 
               debug.honor-xdg-activation-with-invalid-serial = _: { };
 
-              # noctalia ignores logind lock signals; lock on lid close ourselves.
-              switch-events.lid-close.spawn = [
-                noctalia_exe
-                "ipc"
-                "call"
-                "lockScreen"
-                "lock"
-              ];
-
               binds = {
                 # Dedicated Launchers
                 "Mod+T".spawn-sh = lib.getExe self'.packages.terminal;
                 "Mod+E".spawn-sh = lib.getExe self'.packages.file-explorer;
                 "Mod+Escape".toggle-overview = _: { };
-                "Mod+Shift+Escape".spawn-sh = "${noctalia_exe} ipc call lockScreen lock";
                 "Print".screenshot = _: {
                   props.show-pointer = false;
                 };
@@ -155,10 +146,8 @@
                 "Mod+Shift+X".spawn-sh = "kill -9 $(niri msg -j focused-window | ${lib.getExe pkgs.jq} '.pid')";
 
                 # App Launcher, Clipboard history, Emoji Picker, Power Menu.
-                "Mod+Space".spawn-sh = "${vicinae} toggle";
                 "Mod+V".spawn-sh = "${vicinae} vicinae://launch/clipboard/history";
                 "Mod+semicolon".spawn-sh = "${vicinae} vicinae://launch/core/search-emojis";
-                "Mod+M".spawn-sh = "${noctalia_exe} ipc call sessionMenu toggle";
 
                 # Media Controls
                 "XF86AudioRaiseVolume" = _: {
@@ -246,7 +235,23 @@
                 "Mod+Ctrl+J".set-window-height = "-5%";
                 "Mod+Ctrl+L".set-column-width = "+5%";
                 "Mod+Ctrl+H".set-column-width = "-5%";
+              }
+              // lib.optionalAttrs (env.screen-lock-command != null) {
+                "Mod+Shift+Escape".spawn-sh = env.screen-lock-command;
+              }
+              // lib.optionalAttrs (env.launcher-command != null) {
+                "Mod+Space".spawn-sh = env.launcher-command;
+              }
+              // lib.optionalAttrs (env.power-command != null) {
+                "Mod+M".spawn-sh = env.power-command;
               };
+            }
+            // lib.optionalAttrs (env.lid-close-command != null) {
+              switch-events.lid-close.spawn = [
+                "sh"
+                "-c"
+                env.lid-close-command
+              ];
             };
         };
         zsh.rc = [
