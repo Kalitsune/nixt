@@ -167,6 +167,7 @@
                 ]
                 ++ lib.optional (self.lib.isLoaded ("niri")) "niri"
                 ++ lib.optional (self.lib.isLoaded ("ghostty")) "ghostty"
+                ++ lib.optional (self.lib.isLoaded ("alacritty")) "alacritty"
                 ++ lib.optional (self.lib.isLoaded ("helix")) "helix";
 
                 enable_community_templates = true;
@@ -256,6 +257,7 @@
                   opacity = 0.75;
                   widget_spacing = 3;
                   members = [
+                    "caffeine"
                     "network"
                     "bluetooth"
                     "battery"

@@ -31,8 +31,8 @@
           theme = "noctalia";
 
           editor = {
-            line-number = "absolute"; # mirrors options.lua number/norelativenumber
-            rulers = [ 80 ]; # mirrors options.lua colorcolumn
+            line-number = "relative";
+            rulers = [ 80 ];
             bufferline = "multiple";
             color-modes = true;
             cursorline = true;
