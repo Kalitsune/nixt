@@ -18,6 +18,20 @@
 
       # TMP
       services.teamviewer.enable = true;
+      # ponytail: patchelf 0.19 corrupts non-PIE teamviewerd when interpreter is set before rpath
+      # (ld.so SEGV). Re-patch in right order; drop once nixpkgs fixes it.
+      services.teamviewer.package = pkgs.teamviewer.overrideAttrs (o: {
+        nativeBuildInputs = o.nativeBuildInputs ++ [ pkgs.patchelf ];
+        postPhases = [ "tvdFixPhase" ];
+        tvdFixPhase = ''
+          f=$out/share/teamviewer/tv_bin/.teamviewerd-wrapped
+          interp=$(patchelf --print-interpreter $f)
+          rpath=$(patchelf --print-rpath $f)
+          install -m755 opt/teamviewer/tv_bin/teamviewerd $f
+          patchelf --set-rpath "$rpath" $f
+          patchelf --set-interpreter "$interp" $f
+        '';
+      });
 
       # Lid close suspends (niri still locks first); caffeine/keep-awake inhibits it.
       services.logind.settings.Login = {
@@ -103,8 +117,17 @@
         LC_TIME = "fr_FR.UTF-8";
       };
 
-      # Enable CUPS to print documents.
-      services.printing.enable = true;
+      services.printing = {
+        enable = true;
+        drivers = [ pkgs.epson-escpr ];
+        extraConf = "DefaultPaperSize a4";
+      };
+
+      services.avahi = {
+        enable = true;
+        nssmdns4 = true;
+        openFirewall = true;
+      };
 
       # Enable sound with pipewire.
       services.pulseaudio.enable = false;
