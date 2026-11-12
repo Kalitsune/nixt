@@ -5,6 +5,7 @@
       self.nixosModules.extra
       self.nixosModules.education
       self.nixosModules.entertainment
+      self.nixosModules.artcraft
     ];
   };
 
@@ -33,22 +34,19 @@
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor
       self.packages.${pkgs.stdenv.hostPlatform.system}.helix
       self.packages.${pkgs.stdenv.hostPlatform.system}.syncthing
-      pkgs.beeper
-      pkgs.cinny-desktop
       pkgs.filezilla
       pkgs.localsend
 
       # Utils
       pkgs.mission-center
       pkgs.dnsutils
+      self.packages.${pkgs.stdenv.hostPlatform.system}.herdr
     ];
   };
 
   flake.nixosModules.extra = { pkgs, ... }: {
     environment.systemPackages = [
       pkgs.valent
-      pkgs.figma-linux
-      pkgs.inkscape
       pkgs.kicad
     ];
   };
@@ -57,7 +55,6 @@
     environment.systemPackages = [
       pkgs.anki
       pkgs.obsidian
-      # pkgs.zotero
     ];
   };
 

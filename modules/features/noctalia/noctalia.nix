@@ -180,7 +180,8 @@
                   ++ lib.optional (self.lib.isLoaded ("thunderbird")) "thunderbird"
                   ++ lib.optional (self.lib.isLoaded ("prismlauncher")) "prismlauncher"
                   ++ lib.optional (self.lib.isLoaded ("steam")) "steam"
-                  ++ lib.optional (self.lib.isLoaded ("opencode")) "opencode";
+                  ++ lib.optional (self.lib.isLoaded ("opencode")) "opencode"
+                  ++ lib.optional (self.lib.isLoaded ("herdr")) "herdr";
 
                 user = {
                   hermes = {
