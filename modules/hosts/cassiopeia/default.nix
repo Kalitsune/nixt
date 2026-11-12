@@ -26,6 +26,7 @@
       self.nixosModules.voxel-games
       self.nixosModules.vintagestory
       self.nixosModules.k8s
+      self.nixosModules.solidcraft
     ];
   };
 }
