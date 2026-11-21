@@ -89,7 +89,10 @@
       };
     in
     {
-      environment.systemPackages = [ pkgs.herdr-desktop ];
+      environment.systemPackages = [
+        pkgs.herdr
+        pkgs.herdr-desktop
+      ];
 
       # ponytail: read-only symlinks, so Settings UI / keys edits in-app cannot persist. Edit here instead.
       systemd.tmpfiles.rules = [
