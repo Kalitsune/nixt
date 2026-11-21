@@ -26,6 +26,18 @@
             done
           '';
         };
+
+      withThemeFile =
+        pkg:
+        pkgs.symlinkJoin {
+          inherit (pkg) name pname version;
+          paths = [ pkg ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/${pkg.pname} --run \
+              'set -- --theme-file "''${XDG_CONFIG_HOME:-$HOME/.config}/solidcraft/noctalia-theme.json" "$@"'
+          '';
+        };
     in
     {
       packages.figcraft = appimage {
@@ -36,13 +48,14 @@
         id = "ai.storyteller.figcraft";
       };
 
-      packages.solidcraft = appimage {
+      # --theme-file: follows the Noctalia-rendered theme live (noctalia.nix template).
+      packages.solidcraft = withThemeFile (appimage {
         pname = "solidcraft";
         version = "0.45.0";
         url = "https://github.com/tangency-labs/solidcraft/releases/download/v0.45.0/solidcraft-0.45.0-linux-x86_64.AppImage";
         hash = "sha256-rEUzhf/UXtWcYQS8wwqgHLhTvP4zi96qfkLCTMbNHC8=";
         id = "io.tangencylabs.solidcraft";
-      };
+      });
     };
 
   flake.nixosModules.artcraft =

@@ -129,6 +129,18 @@
                   matches = [ { is-focused = true; } ];
                   opacity = 0.8;
                 }
+                # No blur / full opacity: colour-critical creative apps and the
+                # browser. Must stay last so it overrides the focused-window rule.
+                {
+                  matches = [
+                    { app-id = "^ai\\.storyteller\\."; }
+                    { app-id = "^io\\.tangencylabs\\.solidcraft$"; }
+                    { app-id = "^brave-browser$"; }
+                    { app-id = "^(org\\.kicad\\..*|kicad|pcbnew|eeschema|gerbview|pcb_calculator|bitmap2component)$"; }
+                  ];
+                  opacity = 1.0;
+                  background-effect.blur = false;
+                }
               ];
 
               debug.honor-xdg-activation-with-invalid-serial = _: { };

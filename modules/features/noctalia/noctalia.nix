@@ -189,6 +189,13 @@
                       input_path = "${./templates/obsidian.css}";
                       output_path = "${obsidian_vault}/.obsidian/snippets/noctalia.css";
                     };
+                  }
+                  // lib.optionalAttrs (self.lib.isLoaded "solidcraft") {
+                    # Followed live by solidcraft via --theme-file (see artcraft.nix).
+                    solidcraft = {
+                      input_path = "${./templates/solidcraft.json}";
+                      output_path = "$XDG_CONFIG_HOME/solidcraft/noctalia-theme.json";
+                    };
                   };
               };
             };
