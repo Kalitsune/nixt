@@ -10,6 +10,24 @@ let
   # placement differs from the base nixt noctalia (widgets themselves live in
   # modules/features/noctalia/noctalia.nix).
   noctalia = nixtPkgs.noctalia.wrap {
+    plugins = pkgs.lib.mkForce [ "dotnetrob/cat" ];
+    settings.bar.default = {
+      start = pkgs.lib.mkForce [
+        "workspaces"
+        "spacer"
+        "media"
+        "cat"
+      ];
+      center = pkgs.lib.mkForce [
+        "notifications"
+        "clock"
+      ];
+      end = pkgs.lib.mkForce [
+        "spacer"
+        "privacy"
+        "group:control_center"
+      ];
+    };
     settings.lockscreen_widgets = {
       widget_order = [
         "clock_analog"
