@@ -182,13 +182,14 @@
                   ++ lib.optional (self.lib.isLoaded ("steam")) "steam"
                   ++ lib.optional (self.lib.isLoaded ("opencode")) "opencode";
 
-                user = { }
-                // lib.optionalAttrs (obsidian_vault != null) {
-                  obsidian_extra = {
-                    input_path = "${./templates/obsidian.css}";
-                    output_path = "${obsidian_vault}/.obsidian/snippets/noctalia.css";
+                user =
+                  { }
+                  // lib.optionalAttrs (obsidian_vault != null) {
+                    obsidian_extra = {
+                      input_path = "${./templates/obsidian.css}";
+                      output_path = "${obsidian_vault}/.obsidian/snippets/noctalia.css";
+                    };
                   };
-                };
               };
             };
             nightlight = {

@@ -12,7 +12,10 @@
           }
         ];
         packages = [
-          { appId = "at.vintagestory.VintageStory"; origin = "flathub"; }
+          {
+            appId = "at.vintagestory.VintageStory";
+            origin = "flathub";
+          }
           # { appId = "<hytale-app-id>"; origin = "flathub"; } # add when released on flathub
         ];
       };
@@ -22,6 +25,7 @@
         extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
       };
 
-      xdg.mime.defaultApplications."x-scheme-handler/vintagestorymodinstall" = "at.vintagestory.VintageStory-vintagestorymodinstall.desktop";
+      xdg.mime.defaultApplications."x-scheme-handler/vintagestorymodinstall" =
+        "at.vintagestory.VintageStory-vintagestorymodinstall.desktop";
     };
 }

@@ -34,4 +34,25 @@
             };
           };
     };
+
+  # Vicinae watches the app dir by path, but a switch swaps the /run/current-system
+  # symlink, so the old watch goes stale. Restart the server when it changes.
+  flake.nixosModules.vicinae =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.vicinae ];
+
+      systemd.user.paths.vicinae-reload = {
+        wantedBy = [ "graphical-session.target" ];
+        pathConfig.PathChanged = "/run/current-system";
+      };
+      systemd.user.services.vicinae-reload = {
+        # oneshot + transient unit: a long-running service would stay "active" and
+        # swallow later path triggers. --replace kills the previous server.
+        serviceConfig.Type = "oneshot";
+        serviceConfig.ExecStart = "${pkgs.systemd}/bin/systemd-run --user --collect ${
+          self.packages.${pkgs.stdenv.hostPlatform.system}.vicinae
+        }/bin/vicinae server --replace";
+      };
+    };
 }

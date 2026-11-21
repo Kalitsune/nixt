@@ -26,10 +26,12 @@
       self.nixosModules.netbird
       self.nixosModules.flatpak
       self.nixosModules.herdr
+      self.nixosModules.vicinae
     ];
 
     environment.systemPackages = [
       # Apps
+      self.packages.${pkgs.stdenv.hostPlatform.system}.cli-tools
       self.packages.${pkgs.stdenv.hostPlatform.system}.terminal
       self.packages.${pkgs.stdenv.hostPlatform.system}.browser
       self.packages.${pkgs.stdenv.hostPlatform.system}.editor

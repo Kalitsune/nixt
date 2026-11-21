@@ -25,6 +25,8 @@
           enable = true;
           package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri;
         };
+
+        environment.systemPackages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.noctalia ];
       };
     perSystem =
       {

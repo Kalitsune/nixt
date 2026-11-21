@@ -15,11 +15,14 @@
           "lid-close-command"
           "screen-lock-command"
         ]
-        (name: lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          description = "Shell command for ${name}; consumers (e.g. niri) skip the feature when null.";
-        });
+        (
+          name:
+          lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Shell command for ${name}; consumers (e.g. niri) skip the feature when null.";
+          }
+        );
   };
 
   config.perSystem =
