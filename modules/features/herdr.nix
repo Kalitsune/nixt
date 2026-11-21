@@ -1,47 +1,101 @@
+{ ... }:
 {
-  self,
-  config,
-  inputs,
-  ...
-}:
-{
-  perSystem =
-    {
-      pkgs,
-      ...
-    }:
-    {
-      packages.herdr = (inputs.wrapper-modules.lib.evalModule config.flake.wrappers.herdr).config.wrap {
-        inherit pkgs;
-        settings = {
+  flake.nixosModules.herdr =
+    { pkgs, ... }:
+    let
+      home = "/home/kalitsune/.config/herdr-app";
+      json = name: value: pkgs.writeText name (builtins.toJSON value);
 
-          onboarding = false;
-
-          ui = {
-            sidebar_start_collapsed = false;
-            pane_gaps = true;
-          };
-          keys = {
-            prefix = "ctrl+space";
-
-            new_workspace = "prefix+shift+c";
-            rename_workspace = "prefix+shift+r";
-            close_workspace = "prefix+shift+x";
-            previous_workspace = "prefix+shift+p";
-            next_workspace = "prefix+shift+n";
-
-            workspace_picker = "prefix+w";
-            goto = "prefix+space";
-
-            detach = "prefix+q";
-
-            new_tab = "prefix+c";
-            rename_tab = "prefix+r";
-            close_tab = "prefix+x";
-            previous_tab = "prefix+p";
-            next_tab = "prefix+n";
-          };
+      keys = {
+        global = {
+          alt-1 = "space.select:1";
+          alt-2 = "space.select:2";
+          alt-3 = "space.select:3";
+          alt-4 = "space.select:4";
+          alt-5 = "space.select:5";
+          alt-6 = "space.select:6";
+          alt-7 = "space.select:7";
+          alt-8 = "space.select:8";
+          alt-9 = "space.select:9";
+          alt-h = "pane.go:left";
+          alt-j = "pane.go:down";
+          alt-k = "pane.go:up";
+          alt-l = "pane.go:right";
+          alt-left = "pane.go:left";
+          alt-right = "pane.go:right";
+          alt-shift-h = "pane.swap:left";
+          alt-shift-j = "pane.swap:down";
+          alt-shift-k = "pane.swap:up";
+          alt-shift-l = "pane.swap:right";
+          "ctrl-+" = "app.zoom_in";
+          "ctrl--" = "app.zoom_out";
+          ctrl-0 = "app.zoom_reset";
+          "ctrl-=" = "app.zoom_in";
+          ctrl-1 = "tab.select:1";
+          ctrl-2 = "tab.select:2";
+          ctrl-3 = "tab.select:3";
+          ctrl-4 = "tab.select:4";
+          ctrl-5 = "tab.select:5";
+          ctrl-6 = "tab.select:6";
+          ctrl-7 = "tab.select:7";
+          ctrl-8 = "tab.select:8";
+          ctrl-9 = "tab.select:9";
+          ctrl-pagedown = "tab.next";
+          ctrl-pageup = "tab.prev";
+          ctrl-tab = "tab.next";
+          ctrl-shift-tab = "tab.prev";
+          "alt-]" = "tab.next";
+          "alt-[" = "tab.prev";
+          ctrl-shift-pagedown = "space.next";
+          ctrl-shift-pageup = "space.prev";
+          alt-down = "agent.next";
+          alt-up = "agent.prev";
+          "ctrl-?" = "app.help";
+          "ctrl-shift-/" = "app.help";
+          "ctrl-shift-?" = "app.help";
+          ctrl-shift-b = "layout.toggle:sidebar";
+          ctrl-shift-n = "space.new";
+          ctrl-shift-t = "tab.new";
+          ctrl-shift-k = "mod.open:picker";
+          ctrl-shift-p = "app.palette";
+          "ctrl-," = "app.settings";
+          ctrl-shift-o = "pane.split:right";
+          ctrl-shift-e = "pane.split:down";
+          ctrl-shift-w = "tab.close";
+          ctrl-shift-x = "pane.close";
+          ctrl-shift-z = "pane.zoom";
+          ctrl-shift-l = "layout.switch";
+          f2 = "tab.rename";
+          shift-f2 = "space.rename";
+        };
+        terminal = {
+          ctrl-backspace = "send:\u0017";
+          ctrl-left = "send:\u001bb";
+          ctrl-right = "send:\u001bf";
+          ctrl-shift-c = "terminal.copy";
+          ctrl-shift-v = "terminal.paste";
+          ctrl-shift-f = "terminal.search";
+          ctrl-v = "terminal.paste_image";
+          ctrl-insert = "terminal.copy";
+          shift-insert = "terminal.paste";
         };
       };
+
+      settings = {
+        zoom = 1.0;
+        sounds.enabled = true;
+        font_ligatures = false;
+        minimum_contrast = 1.0;
+      };
+    in
+    {
+      environment.systemPackages = [ pkgs.herdr-desktop ];
+
+      # ponytail: read-only symlinks, so Settings UI / keys edits in-app cannot persist. Edit here instead.
+      systemd.tmpfiles.rules = [
+        "d ${home} 0755 kalitsune users -"
+        "L+ ${home}/keys.json - - - - ${json "keys.json" keys}"
+        "L+ ${home}/settings.json - - - - ${json "settings.json" settings}"
+      ];
     };
 }

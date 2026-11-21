@@ -180,15 +180,9 @@
                   ++ lib.optional (self.lib.isLoaded ("thunderbird")) "thunderbird"
                   ++ lib.optional (self.lib.isLoaded ("prismlauncher")) "prismlauncher"
                   ++ lib.optional (self.lib.isLoaded ("steam")) "steam"
-                  ++ lib.optional (self.lib.isLoaded ("opencode")) "opencode"
-                  ++ lib.optional (self.lib.isLoaded ("herdr")) "herdr";
+                  ++ lib.optional (self.lib.isLoaded ("opencode")) "opencode";
 
-                user = {
-                  hermes = {
-                    input_path = "${./templates/hermes.yaml}";
-                    output_path = "~/.hermes/skins/noctalia.yaml";
-                  };
-                }
+                user = { }
                 // lib.optionalAttrs (obsidian_vault != null) {
                   obsidian_extra = {
                     input_path = "${./templates/obsidian.css}";

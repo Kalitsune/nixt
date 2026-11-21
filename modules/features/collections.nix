@@ -25,6 +25,7 @@
       self.nixosModules.tailscale
       self.nixosModules.netbird
       self.nixosModules.flatpak
+      self.nixosModules.herdr
     ];
 
     environment.systemPackages = [
@@ -40,7 +41,6 @@
       # Utils
       pkgs.mission-center
       pkgs.dnsutils
-      self.packages.${pkgs.stdenv.hostPlatform.system}.herdr
     ];
   };
 

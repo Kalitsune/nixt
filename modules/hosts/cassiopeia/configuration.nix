@@ -167,6 +167,9 @@
         ];
       };
 
+      # Run prebuilt dynamically-linked binaries (opencode, etc.).
+      programs.nix-ld.enable = true;
+
       # Install firefox.
       programs.firefox.enable = true;
 

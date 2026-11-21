@@ -14,8 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hermes-agent.url = "github:NousResearch/hermes-agent";
-
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
