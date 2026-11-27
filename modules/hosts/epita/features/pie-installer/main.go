@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/charmbracelet/bubbles/paginator"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,12 +14,46 @@ import (
 )
 
 const (
-	flakeURL     = "github:kalitsune/nixt"
 	installerPkg = "pie-installer"
 	confsRelDir  = "afs/.confs"
 	commandFile  = "pie-installer-cmd"
 	tty2Device   = "/dev/tty2"
 )
+
+// Mirrors tried in order; first one `nix flake metadata` can reach wins.
+var flakeURLs = []string{
+	"git+https://git.geod.es/maple/nixt",
+	"github:kalitsune/nixt",
+}
+
+func reachableFlake() string {
+	nixPath, err := exec.LookPath("nix")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "pie-installer: nix not found in PATH\n")
+		os.Exit(1)
+	}
+	for _, u := range flakeURLs {
+		cmd := exec.Command(nixPath, "flake", "metadata", u)
+		if err := cmd.Start(); err != nil {
+			continue
+		}
+		done := make(chan error, 1)
+		go func() { done <- cmd.Wait() }()
+		select {
+		case err := <-done:
+			if err == nil {
+				return u
+			}
+		case <-time.After(30 * time.Second):
+			_ = cmd.Process.Kill()
+			<-done
+		}
+		fmt.Fprintf(os.Stderr, "pie-installer: %s unreachable, trying next\n", u)
+	}
+	fmt.Fprintf(os.Stderr, "pie-installer: no flake mirror reachable\n")
+	os.Exit(1)
+	return ""
+}
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -369,9 +404,15 @@ func commandFilePath() string {
 	return homeDir() + "/" + confsRelDir + "/" + commandFile
 }
 
+func autobootCommand(style string) string {
+	return fmt.Sprintf(
+		`for u in %s; do nix flake metadata "$u" >/dev/null 2>&1 && exec nix run "$u#%s" --style=%s; done`,
+		strings.Join(flakeURLs, " "), installerPkg, style)
+}
+
 func writeAutoboot(style string) {
 	cmdFilePath := commandFilePath()
-	fullCommand := fmt.Sprintf("nix run %s#%s --style=%s", flakeURL, installerPkg, style)
+	fullCommand := autobootCommand(style)
 	if err := os.WriteFile(cmdFilePath, []byte(fullCommand+"\n"), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "pie-installer: failed to write command file: %v\n", err)
 		return
@@ -381,7 +422,7 @@ func writeAutoboot(style string) {
 
 func runNixShell(style string) {
 	args := []string{"nix", "run", "--impure",
-		fmt.Sprintf("%s#epita-%s", flakeURL, style)}
+		fmt.Sprintf("%s#epita-%s", reachableFlake(), style)}
 
 	nixPath, err := exec.LookPath("nix")
 	if err != nil {
@@ -416,11 +457,11 @@ func handleDryRun(cfg config) {
 	}
 
 	if cfg.save || (!cfg.pick && !cfg.styleFromCLI) {
-		cmd := fmt.Sprintf("nix profile add %s#%s --style=%s", flakeURL, installerPkg, style)
+		cmd := autobootCommand(style)
 		fmt.Printf("[DRY RUN] Would write to %s:\n  %s\n", commandFilePath(), cmd)
 	}
 
-	fmt.Printf("[DRY RUN] Would exec: nix profile add --impure %s#epita-%s\n", flakeURL, style)
+	fmt.Printf("[DRY RUN] Would exec: nix run --impure <first reachable of %s>#epita-%s\n", strings.Join(flakeURLs, ", "), style)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────

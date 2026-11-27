@@ -1,4 +1,4 @@
-# Exposes packages.pie-installer — nix run github:kalitsune/nixt#pie-installer
+# Exposes packages.pie-installer — nix run git+https://git.geod.es/maple/nixt#pie-installer (or github:kalitsune/nixt)
 # devShells are defined in shell-nixt-style.nix and shell-pie-style.nix.
 { ... }:
 {

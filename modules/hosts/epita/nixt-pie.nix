@@ -1,10 +1,8 @@
-{ pkgs }:
+{ pkgs, self }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  nixt = builtins.getFlake "github:kalitsune/nixt";
-  pie = builtins.getFlake "github:epita/nixpie";
-  nixtPkgs = nixt.packages.${system};
-  terminal = pie.inputs.nixpkgs.legacyPackages.${system}.alacritty;
+  nixtPkgs = self.packages.${system};
+  terminal = pkgs.alacritty;
 
   # EPITA machines are a single 1920x1080 DP-1 screen: only the lockscreen widget
   # placement differs from the base nixt noctalia (widgets themselves live in
@@ -87,8 +85,6 @@ in
 {
   inherit
     system
-    nixt
-    pie
     terminal
     noctalia
     keybinds
